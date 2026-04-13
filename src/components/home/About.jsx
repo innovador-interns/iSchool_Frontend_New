@@ -6,7 +6,7 @@ import { slideInLeft, fadeInUp } from '../../lib/animations'
 
 export function About() {
   return (
-    <section id="about" className="py-16 lg:py-20 bg-white overflow-hidden">
+    <section id="about" className="py-16 lg:py-18 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 flex flex-col lg:flex-row items-center gap-16">
         <SectionReveal className="flex-1">
           <motion.div variants={slideInLeft} className="relative">

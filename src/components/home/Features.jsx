@@ -1,102 +1,110 @@
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import formImg from '../../assets/form-img.png'
 import { featuresNotice } from './data'
 import { SectionReveal } from './SectionReveal'
-import { fadeInUp, slideInLeft, slideInRight, fadeIn } from '../../lib/animations'
+import { X, Check, ChevronRight } from 'lucide-react'
 
-// FEATURE DIALOG
-function FeatureDialog({ feature, onClose }) {
+function FeaturePanel({ feature, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
 
   return (
     <motion.div
-      className="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6"
+      role="presentation"
+      className="fixed inset-0 z-50 flex justify-end"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.2 }}
     >
-      <motion.div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[4px]"
-        style={{ willChange: 'opacity' }}
+      <div
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
         onClick={onClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        aria-hidden
       />
 
       <motion.div
-        className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden z-10"
-        style={{ 
-          willChange: 'transform, opacity, scale',
-          contain: 'layout paint strict'
-        }}
-        initial={{ opacity: 0, scale: 0.94, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.94, y: 15 }}
-        transition={{ 
-          type: 'spring', 
-          stiffness: 450, 
-          damping: 32,
-          mass: 0.6
-        }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="feature-panel-title"
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+        className="relative z-10 flex h-full w-full max-w-full flex-col bg-white shadow-2xl sm:max-w-[440px] sm:rounded-l-3xl sm:border-l sm:border-slate-100"
       >
-        <div className="relative px-8 pt-8 pb-6 text-white" style={{ background: `linear-gradient(135deg, #005280 0%, #0284c7 100%)` }}>
+        <div
+          className="relative overflow-hidden px-6 pb-7 pt-8 text-white mt-18"
+          style={{
+            background: `linear-gradient(145deg, ${feature.accent} 0%, color-mix(in srgb, ${feature.accent} 55%, #0f172a) 100%)`,
+          }}
+        >
           <div
-            className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10"
-            style={{ background: feature.accent, transform: 'translate(30%, -30%)', willChange: 'transform' }}
+            className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-2xl"
+            aria-hidden
           />
-
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center ring-2 ring-white/30 overflow-hidden">
-              <img src={feature.dialogueImage} alt="" className="w-full h-full object-cover" />
+          <div className="relative flex items-start gap-4">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-1 shadow-inner backdrop-blur-sm">
+              <img
+                src={feature.image}
+                alt=""
+                className="h-full w-full rounded-[0.65rem] object-cover"
+              />
             </div>
-            <div>
-              <p className="text-white/70 text-xs uppercase tracking-widest font-semibold">Features</p>
-              <h2 className="text-white text-2xl font-bold">{feature.title}</h2>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/70">
+                Feature overview
+              </p>
+              <h2 id="feature-panel-title" className="mt-1 text-xl font-bold leading-snug">
+                {feature.title}
+              </h2>
             </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+              aria-label="Close panel"
+            >
+              <X size={20} strokeWidth={2.25} />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
         </div>
 
-        <div className="px-8 py-6 max-h-[55vh] overflow-y-auto custom-scroll">
-          <ul className="space-y-3">
-              {feature.list.map((item, i) => (
-                <motion.li
-                  key={i}
-                  className="flex items-center gap-3 text-slate-700 text-sm"
-                  style={{ willChange: 'opacity, transform' }}
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.35 + i * 0.02, duration: 0.3 }}
-                >
+        <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-6">
+          <p className="mb-4 text-sm font-medium text-slate-500">
+            Everything included in this area
+          </p>
+          <ul className="space-y-2">
+            {feature.list.map((item, i) => (
+              <motion.li
+                key={i}
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: Math.min(i * 0.04, 0.4) }}
+                className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 text-sm leading-relaxed text-slate-700"
+              >
                 <span
-                  className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
-                  style={{ background: feature.accent ?? '#005280' }}
+                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                  style={{
+                    backgroundColor: `color-mix(in srgb, ${feature.accent} 18%, white)`,
+                    color: feature.accent,
+                  }}
                 >
-                  ✓
+                  <Check size={12} strokeWidth={3} aria-hidden />
                 </span>
-                {item}
+                <span>{item}</span>
               </motion.li>
             ))}
           </ul>
-        </div>
-
-        <div className="px-8 pb-7 pt-2">
-          <button
-            onClick={onClose}
-            className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-opacity hover:opacity-90 cursor-pointer"
-            style={{ background: 'linear-gradient(135deg, #005280, #0284c7)' }}
-          >
-            Close
-          </button>
         </div>
       </motion.div>
     </motion.div>
@@ -104,129 +112,128 @@ function FeatureDialog({ feature, onClose }) {
 }
 
 export function Features() {
-  const [dialogueFeature, setDialogueFeature] = useState(null)
-  const [scrollbarWidth, setScrollbarWidth] = useState(0)
-
-  useEffect(() => {
-    const width = window.innerWidth - document.documentElement.clientWidth
-    setScrollbarWidth(width)
-  }, [])
-
-  useEffect(() => {
-    const body = document.body
-    const html = document.documentElement
-    
-    if (dialogueFeature) {
-      body.classList.add('modal-open')
-      if (scrollbarWidth > 0) {
-        html.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`)
-      }
-    } else {
-      body.classList.remove('modal-open')
-      html.style.removeProperty('--scrollbar-width')
-    }
-
-    return () => {
-      body.classList.remove('modal-open')
-      html.style.removeProperty('--scrollbar-width')
-    }
-  }, [dialogueFeature, scrollbarWidth])
+  const [activeFeature, setActiveFeature] = useState(null)
+  const closePanel = useCallback(() => setActiveFeature(null), [])
 
   return (
-    <section id="features" className="py-16 lg:py-24 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+    <section id="features" className="overflow-hidden bg-gradient-to-b from-white via-slate-50/80 to-slate-100/60 py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-20">
+        <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
+          <SectionReveal>
+            <div className="relative">
+              <div className="absolute -left-10 -top-10 h-72 w-72 rounded-full bg-sky-100/80 blur-3xl" />
+              <div className="absolute -bottom-12 -right-8 h-80 w-80 rounded-full bg-rose-100/70 blur-3xl" />
 
-          {/* Left — App Overview */}
-          <SectionReveal className="flex flex-col gap-0">
-            <motion.div variants={slideInLeft} className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #005280 0%, #0284c7 100%)' }}>
-              <div className="px-10 py-8">
-                <p className="text-white/60 text-xs uppercase tracking-[0.2em] font-semibold mb-1">About</p>
-                <h3 className="text-white text-3xl font-black">App Overview</h3>
-              </div>
-            </motion.div>
-            <motion.div variants={fadeIn} className="mt-5 w-full h-[400px] flex justify-center">
-              <img src={formImg} alt="App" className="w-[330px] object-cover h-full" />
-            </motion.div>
-            <motion.div variants={fadeInUp} className="mt-8 flex flex-col gap-4">
-              <h3 className="text-2xl font-black text-slate-900 leading-tight">
-                Simplifying School Management with User-Friendly Software.
-              </h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                iSchool Mobile App enables management & teachers to update important & urgent information at anytime
-                while students & parents get notifications and can track progress in real time.
-              </p>
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 32 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10"
+              >
+                <p className="mb-3 inline-flex items-center rounded-full border border-sky-200/80 bg-sky-50/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-sky-800">
+                  Why iSchool
+                </p>
+                <h2 className="max-w-xl text-4xl font-black leading-tight tracking-tight text-slate-900 sm:text-[2.5rem]">
+                  Simplifying school management software.
+                </h2>
+                <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
+                  iSchool brings students, teachers, and communication together in one place—with a
+                  calm, modern experience your whole school can rely on.
+                </p>
+
+                <div className="relative mt-10 w-full max-w-[min(100%,380px)]">
+                  <div
+                    className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-sky-100/50 to-rose-100/40 blur-xl"
+                    aria-hidden
+                  />
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }}
+                    className="relative overflow-hidden"
+                  >
+                    <img
+                      src={formImg}
+                      alt="iSchool dashboard preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </motion.div>
+                </div>
+              </motion.div>
+            </div>
           </SectionReveal>
 
-          {/* Right — Key Specs */}
-          <SectionReveal className="flex flex-col gap-0">
-            <motion.div 
-              variants={slideInRight} 
-              className="rounded-2xl overflow-hidden" 
-              style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #005280 100%)', willChange: 'transform, opacity' }}
-            >
-              <div className="px-10 py-8">
-                <p className="text-white/60 text-xs uppercase tracking-[0.2em] font-semibold mb-1">Features</p>
-                <h3 className="text-white text-3xl font-black">Key Specifications</h3>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="mt-8 flex flex-col gap-6"
-              variants={{
-                visible: {
-                  transition: { staggerChildren: 0.1 }
-                }
-              }}
-              style={{ willChange: 'transform' }}
-            >
-              {featuresNotice.map((feat, idx) => (
+          <SectionReveal>
+            <div className="flex flex-col gap-4">
+              <p className="mb-1 text-sm font-medium text-slate-500 lg:hidden">
+                Tap a card to see the full feature list
+              </p>
+              {featuresNotice.map((feat, i) => (
                 <motion.div
-                  key={idx}
-                  variants={fadeInUp}
-                  style={{ willChange: 'transform, opacity' }}
-                  className="flex gap-4 p-5 rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors group cursor-pointer"
-                  onClick={() => setDialogueFeature(feat)}
+                  key={feat.title}
+                  initial={{ opacity: 0, x: 28 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-md focus-within:border-slate-300 focus-within:shadow-md focus-within:outline-none"
+                  style={{ boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)' }}
+                  onClick={() => setActiveFeature(feat)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setActiveFeature(feat)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open details for ${feat.title}`}
                 >
                   <div
-                    className="shrink-0 w-12 h-12 rounded-xl overflow-hidden"
-                    style={{ ringColor: feat.accent }}
-                  >
-                    <img src={feat.image} alt={feat.title} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-slate-900 mb-2">{feat.title}</h4>
-                    <ul className="flex flex-col gap-1 mb-3">
-                      {feat.list.slice(0, 3).map((item, j) => (
-                        <li key={j} className="flex items-center gap-2 text-slate-500 text-sm">
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: feat.accent }} />
-                          {item}
-                        </li>
-                      ))}
-                      <li className="text-slate-400 text-xs">+{feat.list.length - 3} more features</li>
-                    </ul>
-                    <button
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-90 cursor-pointer"
-                      style={{ background: feat.accent ?? '#005280' }}
+                    className="pointer-events-none absolute bottom-4 left-0 top-4 w-1 rounded-r-full opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100"
+                    style={{ backgroundColor: feat.accent }}
+                    aria-hidden
+                  />
+                  <div className="relative flex items-start gap-4">
+                    <div
+                      className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-inner ring-1 ring-black/[0.04]"
+                      style={{
+                        backgroundColor: `color-mix(in srgb, ${feat.accent} 12%, white)`,
+                      }}
                     >
-                      View All Features
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </button>
+                      <img src={feat.image} alt="" className="h-11 w-11 object-cover" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2 sm:justify-between">
+                        <h3 className="text-lg font-bold text-slate-900">{feat.title}</h3>
+                        <span
+                          className="inline-flex items-center gap-0.5 text-xs font-semibold transition-colors sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                          style={{ color: feat.accent }}
+                        >
+                          Read features
+                          <ChevronRight size={14} strokeWidth={2.5} className="opacity-80" />
+                        </span>
+                      </div>
+                      <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-600">
+                        {feat.list[0]}
+                      </p>
+                      <div className="mt-4 h-px w-full overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full w-0 transition-all duration-300 group-hover:w-full group-focus-within:w-full"
+                          style={{ backgroundColor: feat.accent }}
+                          aria-hidden
+                        />
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           </SectionReveal>
         </div>
       </div>
 
       <AnimatePresence>
-        {dialogueFeature && (
-          <FeatureDialog feature={dialogueFeature} onClose={() => setDialogueFeature(null)} />
-        )}
+        {activeFeature && <FeaturePanel feature={activeFeature} onClose={closePanel} />}
       </AnimatePresence>
     </section>
   )
