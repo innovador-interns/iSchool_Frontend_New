@@ -16,10 +16,10 @@ const navItems = [
 const scrollToSection = (elementId, offset = 80) => {
   const element = document.getElementById(elementId);
   if (!element) return;
-  
+
   const elementPosition = element.getBoundingClientRect().top;
   const offsetPosition = elementPosition + window.scrollY - offset;
-  
+
   window.scrollTo({
     top: offsetPosition,
     behavior: 'smooth'
@@ -70,23 +70,23 @@ function Nav() {
   const isScrollingRef = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Scroll progress bar
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  
+
   // Optimized scroll effect using Framer Motion's high-perf hook
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, "change", (latest) => {
     if (latest > 20 && !scrolled) setScrolled(true);
     else if (latest <= 20 && scrolled) setScrolled(false);
   });
-  
+
   // Close mobile menu on route change
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname, location.hash]);
-  
+
   // Intersection Observer for scroll spy
   useEffect(() => {
     // Clear flag on scroll end to ensure observer takes over correctly
@@ -97,7 +97,7 @@ function Nav() {
 
     const sections = navItems.filter(item => item.hash).map(item => item.hash);
     if (sections.length === 0) return;
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         // Skip observer updates while manual scroll is active
@@ -120,18 +120,18 @@ function Nav() {
         threshold: 0
       }
     );
-    
+
     sections.forEach(section => {
       const element = document.getElementById(section);
       if (element) observer.observe(element);
     });
-    
+
     return () => {
       observer.disconnect();
       window.removeEventListener('scrollend', handleScrollEnd);
     };
   }, [location.pathname]);
-  
+
   // Handle hash navigation after route change
   useEffect(() => {
     if (location.pathname === '/' && location.hash) {
@@ -141,20 +141,20 @@ function Nav() {
       }, 100);
     }
   }, [location]);
-  
+
   // Navigation handler with smooth scroll
   const handleNavigation = useCallback(async (to, hash, e) => {
     e?.preventDefault();
-    
+
     if (location.pathname !== '/') {
       // Navigate to home with hash
       navigate(to);
       return;
     }
-    
+
     // Already on home page, just scroll
     isScrollingRef.current = true;
-    
+
     if (hash) {
       setActiveSection(hash);
       scrollToSection(hash, 80);
@@ -164,15 +164,15 @@ function Nav() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       window.history.pushState(null, '', '/');
     }
-    
+
     // Reset scrolling flag after animation finishes
     setTimeout(() => {
       isScrollingRef.current = false;
     }, 1000);
-    
+
     setIsOpen(false);
   }, [location.pathname, navigate]);
-  
+
   // Check if a nav item is active
   const isItemActive = (item) => {
     if (item.hash === '') {
@@ -180,7 +180,7 @@ function Nav() {
     }
     return activeSection === item.hash;
   };
-  
+
   return (
     <>
       {/* Scroll Progress Bar */}
@@ -188,14 +188,13 @@ function Nav() {
         className="fixed top-0 left-0 right-0 z-200 h-1 bg-linear-to-r from-[#005280] via-[#0088b0] to-[#005280] origin-left"
         style={{ scaleX, marginRight: 'var(--scrollbar-width, 0px)' }}
       />
-      
+
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-100 transition-[background,padding,box-shadow,border-color] duration-500 ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-100 transition-[background,padding,box-shadow,border-color] duration-500 ${scrolled
             ? 'py-3 bg-white/90 backdrop-blur-md shadow-lg border-b border-slate-200/30'
             : 'py-5 bg-transparent'
-        }`}
+          }`}
         style={{ marginRight: 'var(--scrollbar-width, 0px)' }}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12">
@@ -221,7 +220,7 @@ function Nav() {
               />
             </motion.div>
           </NavLink>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden items-center gap-1 md:flex">
             <LayoutGroup>
@@ -235,16 +234,15 @@ function Nav() {
                 >
                   <button
                     onClick={(e) => handleNavigation(item.to, item.hash, e)}
-                    className={`relative px-4 py-2.5 text-sm font-medium transition-all duration-300 rounded-xl ${
-                      isItemActive(item)
+                    className={`relative px-4 py-2.5 text-sm font-medium transition-all duration-300 rounded-xl ${isItemActive(item)
                         ? 'text-[#005280]'
                         : 'text-slate-600 hover:text-[#005280] hover:bg-[#005280]/5'
-                    }`}
+                      }`}
                   >
                     <span className="relative z-10 flex items-center gap-1">
                       {item.label}
                     </span>
-                    
+
                     {/* Animated active background pill */}
                     {isItemActive(item) && (
                       <motion.div
@@ -254,7 +252,7 @@ function Nav() {
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                       />
                     )}
-                    
+
                     {/* Animated bottom underline */}
                     <motion.div
                       className="absolute bottom-1 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-[#005280]"
@@ -269,7 +267,7 @@ function Nav() {
                 </motion.div>
               ))}
             </LayoutGroup>
-            
+
             {/* CTA Button with glow effect */}
             <motion.a
               whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(0,82,128,0.4)' }}
@@ -291,7 +289,7 @@ function Nav() {
               />
             </motion.a>
           </nav>
-          
+
           {/* Mobile Menu Button */}
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
@@ -325,7 +323,7 @@ function Nav() {
             </AnimatePresence>
           </motion.button>
         </div>
-        
+
         {/* Mobile Menu Overlay */}
         <AnimatePresence>
           {isOpen && (
@@ -353,20 +351,18 @@ function Nav() {
                     >
                       <button
                         onClick={(e) => handleNavigation(item.to, item.hash, e)}
-                        className={`group flex w-full items-center justify-between rounded-2xl px-5 py-4 text-left text-xl font-semibold transition-all duration-300 ${
-                          isItemActive(item)
+                        className={`group flex w-full items-center justify-between rounded-2xl px-5 py-4 text-left text-xl font-semibold transition-all duration-300 ${isItemActive(item)
                             ? 'bg-linear-to-r from-[#005280]/15 to-[#0088b0]/15 text-[#005280]'
                             : 'text-slate-700 hover:bg-slate-100'
-                        }`}
+                          }`}
                       >
                         <span className="flex items-center gap-3">
                           {item.label}
                         </span>
                         <ChevronRight
                           size={20}
-                          className={`transition-all duration-300 ${
-                            isItemActive(item) ? 'translate-x-1 opacity-100' : 'opacity-0 group-hover:translate-x-1 group-hover:opacity-100'
-                          }`}
+                          className={`transition-all duration-300 ${isItemActive(item) ? 'translate-x-1 opacity-100' : 'opacity-0 group-hover:translate-x-1 group-hover:opacity-100'
+                            }`}
                         />
                       </button>
                     </motion.div>
@@ -388,7 +384,7 @@ function Nav() {
           )}
         </AnimatePresence>
       </header>
-      
+
       {/* Spacer to prevent content from hiding under fixed header */}
       <div className="h-20 lg:h-24" />
     </>
