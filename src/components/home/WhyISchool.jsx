@@ -1,107 +1,196 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { lists } from './data'
-import { fadeInUp, staggerContainer, viewportSettings } from '../../lib/animations'
+import { useScrollReveal } from '../../hooks/useScrollReveal'
 import vector from '../../assets/admission-vector-1.svg'
 
-// Custom card animation variant
-const cardItemVariant = {
-  hidden: { opacity: 0, y: 40, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    scale: 1,
-    transition: { 
-      type: "spring",
-      stiffness: 100,
-      damping: 15,
-      duration: 0.8
-    }
+// Per-card Framer variants — intentional, not accidental
+const cardVariants = {
+  rest: {
+    y: 0,
+    boxShadow: '0 10px 40px rgba(0,0,0,0.02)',
+  },
+  hover: {
+    y: -16,
+    boxShadow: '0 28px 64px rgba(0,82,128,0.11)',
+    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] }
+  }
+}
+
+const glowVariants = {
+  rest: { opacity: 0 },
+  hover: { opacity: 1, transition: { duration: 0.6, ease: 'easeOut' } }
+}
+
+const lineVariants = {
+  rest: { width: '3rem', background: 'linear-gradient(to right, #e5e7eb, #e5e7eb)' },
+  hover: {
+    width: '100%',
+    background: 'linear-gradient(to right, #C90606, #005280)',
+    transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
   }
 }
 
 export function WhyISchool() {
-  return (
-    <section id="whyischool" className="py-16 lg:py-18 overflow-hidden relative bg-white">
-      {/* Decorative Background Elements */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#005280]/5 rounded-full blur-3xl" />
-      <div className="absolute top-1/2 -left-24 w-72 h-72 bg-blue-50/50 rounded-full blur-3xl animate-pulse" />
-      
-      {/* Background Vector */}
-      <div className="absolute top-52 left-0 w-72 opacity-[0.03] pointer-events-none select-none">
-        <img src={vector} alt="" className="h-full w-full object-contain" />
-      </div>
+  const sectionRef = useRef(null);
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 relative z-10">
-        {/* Section Header - Centered for Premium Look */}
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportSettings}
-          variants={staggerContainer}
-          className="flex flex-col items-center text-center gap-4 mb-20"
-        >
-          <motion.div variants={fadeInUp} className="flex flex-col items-center gap-2">
-            <h2 className="text-4xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight mt-4">
-              Why <span className="text-[#005280] relative">
-                iSchool
-                <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 100 8" preserveAspectRatio="none">
-                  <path d="M0 7C20 7 30 2 50 2C70 2 80 7 100 7" stroke="#005280" strokeWidth="2" fill="none" opacity="0.3" />
-                </svg>
-              </span>
-            </h2>
-          </motion.div>
-          <motion.p variants={fadeInUp} className="max-w-2xl text-slate-500 text-lg leading-relaxed mt-4">
-            Discover why educational institutions worldwide trust iSchool to transform their administrative and academic horizons.
-          </motion.p>
+  const containerRef = useScrollReveal({
+    y: 56,
+    stagger: 0.1,
+    duration: 1.25,
+    ease: 'expo.out',
+    start: 'top 80%',
+  });
+
+  // Background parallax drift — GSAP handles the cards, Framer handles bg blobs
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const blobY = useTransform(scrollYProgress, [0, 1], ['0%', '22%']);
+  const vectorY = useTransform(scrollYProgress, [0, 1], ['0%', '12%']);
+
+  return (
+    <section
+      id="whyischool"
+      ref={(el) => {
+        containerRef.current = el;
+        sectionRef.current = el;
+      }}
+      className="py-28 lg:py-44 overflow-hidden relative bg-white"
+    >
+      {/* ── Layered Background ── */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {/* Tinted right panel */}
+        <div className="absolute top-0 right-0 w-2/5 h-full bg-gradient-to-l from-[#005280]/[0.025] to-transparent" />
+
+        {/* Animated blobs */}
+        <motion.div style={{ y: blobY }} className="absolute inset-0">
+          <div className="absolute bottom-1/4 -left-16 w-72 h-72 bg-[#C90606]/[0.035] rounded-full blur-[60px]" />
+          <div className="absolute top-16 right-[10%] w-64 h-64 bg-[#005280]/[0.04] rounded-full blur-[56px]" />
         </motion.div>
 
-        {/* Features Grid with Staggered Animation */}
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportSettings}
-          variants={staggerContainer}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12"
-        >
+        {/* Dot grid */}
+        <div
+          className="absolute inset-0 opacity-[0.018]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #005280 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+      </div>
+
+      {/* Watermark vector */}
+      <motion.div
+        style={{ y: vectorY }}
+        className="absolute top-24 left-8 w-80 opacity-[0.025] pointer-events-none select-none rotate-[14deg] z-0"
+      >
+        <img src={vector} alt="" className="h-full w-full object-contain" />
+      </motion.div>
+
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 relative z-10">
+
+        {/* ── Section Header ── */}
+        <div className="reveal-item flex flex-col items-center text-center gap-6 mb-28">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C90606]/8 text-[#C90606] text-[11px] font-bold uppercase tracking-[0.18em]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C90606] animate-pulse" />
+            Distinction
+          </span>
+
+          <h2 className="text-4xl md:text-[3.6rem] font-extrabold text-[#1A1A1A] tracking-tight leading-[1.1]">
+            Why Educational Leaders <br />
+            <span className="text-[#005280] relative inline-block">
+              Choose iSchool
+              {/* Animated underline */}
+              <svg
+                className="absolute -bottom-2 left-0 w-full"
+                viewBox="0 0 340 8"
+                fill="none"
+                preserveAspectRatio="none"
+              >
+                <motion.path
+                  d="M2 6 Q85 2 170 5 Q255 8 338 4"
+                  stroke="#C90606"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  whileInView={{ pathLength: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1.0, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                />
+              </svg>
+            </span>
+          </h2>
+
+          {/* Divider pill group */}
+          <div className="flex items-center gap-2">
+            <div className="w-12 h-[3px] bg-[#C90606] rounded-full" />
+            <div className="w-3 h-[3px] bg-[#C90606]/40 rounded-full" />
+            <div className="w-1.5 h-[3px] bg-[#C90606]/20 rounded-full" />
+          </div>
+
+          <p className="max-w-2xl text-[#666] text-[1.05rem] md:text-lg leading-[1.8]">
+            Discover why educational institutions worldwide trust iSchool to transform
+            their administrative and academic horizons.
+          </p>
+        </div>
+
+        {/* ── Features Grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
           {lists.map((item, i) => (
             <motion.div
               key={i}
-              variants={cardItemVariant}
-              whileHover={{ 
-                y: -12,
-                transition: { duration: 0.4, ease: "easeOut" }
-              }}
-              className="group relative h-full"
+              className="reveal-item group relative"
+              variants={cardVariants}
+              initial="rest"
+              whileHover="hover"
             >
-              <div className="absolute inset-0 bg-linear-to-br from-[#005280]/5 to-transparent rounded-[2.5rem] -m-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative bg-white p-8 lg:p-10 rounded-4xl border border-slate-100 shadow-sm group-hover:shadow-2xl group-hover:shadow-[#005280]/10 transition-all duration-500 flex flex-col gap-6 h-full z-10 overflow-hidden">
-                {/* Abstract Shape in Card */}
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-slate-100 rounded-full transition-colors duration-500 -z-10" />
-                
-                <div className="w-16 h-16 rounded-2xl bg-[#f8fafc] flex items-center justify-center transition-all duration-500 group-hover:rotate-10 shadow-inner">
-                  <img 
-                    src={item.img} 
-                    alt="ordered list"
-                    className="h-10 w-10 object-contain transition-all duration-500" 
-                  />
+              {/* Glow halo */}
+              <motion.div
+                variants={glowVariants}
+                className="absolute -inset-2 bg-gradient-to-br from-[#005280]/18 via-transparent to-[#C90606]/8 rounded-[44px] blur-2xl z-0"
+              />
+
+              <div className="relative bg-white p-10 rounded-[36px] border border-gray-100/90 transition-colors duration-500 group-hover:border-blue-100/60 flex flex-col h-full z-10 overflow-hidden">
+
+                {/* Number watermark */}
+                <div className="absolute top-5 right-7 text-[5rem] font-black text-gray-50 group-hover:text-[#005280]/[0.06] transition-colors duration-500 leading-none select-none">
+                  {i + 1 < 10 ? `0${i + 1}` : i + 1}
                 </div>
 
-                <div className="flex flex-col gap-4">
-                  <h3 className="text-xl lg:text-2xl font-bold text-slate-900 group-hover:text-[#005280] transition-colors duration-300">
+                {/* Icon */}
+                <motion.div
+                  className="w-[72px] h-[72px] rounded-2xl bg-gray-50 flex items-center justify-center mb-10 group-hover:bg-[#005280] transition-all duration-500 shadow-inner"
+                  whileHover={{ rotate: 9, scale: 1.07 }}
+                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <img
+                    src={item.img}
+                    alt={item.title}
+                    className="h-9 w-9 object-contain group-hover:invert group-hover:brightness-0 transition-all duration-500"
+                  />
+                </motion.div>
+
+                {/* Text */}
+                <div className="mt-auto">
+                  <h3 className="text-[1.35rem] font-bold text-[#1A1A1A] mb-3 group-hover:text-[#005280] transition-colors duration-300 leading-snug">
                     {item.title}
                   </h3>
-                  <p className="text-slate-500 text-[15px] leading-relaxed group-hover:text-slate-600 transition-colors duration-300">
+                  <p className="text-[#666] text-[0.9rem] leading-[1.8]">
                     {item.desc}
                   </p>
                 </div>
+
+                {/* Animated bottom rule */}
+                <motion.div
+                  variants={lineVariants}
+                  className="mt-8 h-[3px] rounded-full"
+                />
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )
 }
-

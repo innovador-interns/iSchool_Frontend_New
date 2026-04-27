@@ -4,8 +4,8 @@ import { About } from '../components/home/About'
 import { WhyISchool } from '../components/home/WhyISchool'
 import { Features } from '../components/home/Features'
 import { CTA } from '../components/home/CTA'
-import { Modules } from '../components/home/Modules'
 import { AppScreens } from '../components/home/AppScreens'
+import HorizontalFeatures from '../components/home/HorizontalFeatures'
 
 function HeroSection() {
   return (
@@ -14,9 +14,9 @@ function HeroSection() {
       <About />
       <WhyISchool />
       <Features />
-      <CTA />
-      <Modules />
+      <HorizontalFeatures />
       <AppScreens />
+      <CTA />
     </div>
   )
 }
