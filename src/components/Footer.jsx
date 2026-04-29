@@ -209,6 +209,7 @@ function Footer() {
             <div className="space-y-3 text-[#475569] text-sm">
               {["Home", "About", "Why iSchool", "Features", "Modules"].map((item, i) => (
                 <motion.a
+                  key={i}
                   onClick={() => {
                     const target = document.querySelector(`#${item.toLowerCase().replace(/\s+/g, '-')}`);
                     if (target) {

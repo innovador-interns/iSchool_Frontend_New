@@ -282,7 +282,7 @@ function Nav() {
                 <ChevronRight size={16} className="transition-transform group-hover:translate-x-1" />
               </span>
               <motion.div
-                className="absolute inset-0 -z-0 bg-linear-to-r from-white/20 to-transparent"
+                className="absolute inset-0 z-0 bg-linear-to-r from-white/20 to-transparent"
                 initial={{ x: '-100%' }}
                 whileHover={{ x: '100%' }}
                 transition={{ duration: 0.5 }}

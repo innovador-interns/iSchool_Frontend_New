@@ -1,15 +1,3 @@
-/**
- * HorizontalFeatures.jsx
- *
- * PIN STRATEGY: CSS sticky + JS scroll mapping
- * ─────────────────────────────────────────────
- * #pin-wrapper  → height = 100vh + scrollAmount  ← provides scroll distance
- * .sticky-shell → position:sticky; top:0          ← stays in viewport
- * JS maps window.scrollY → card track translateX
- *
- * RESULT: Next section appears AFTER wrapper ends — zero overlap, zero GSAP conflicts.
- */
-
 import React, { useRef, useEffect, useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { moduleFeatures } from './data'
@@ -21,11 +9,11 @@ const ModuleCard = ({ module, index }) => {
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="group relative w-full min-w-[300px]"
+      className="group relative w-full min-w-75"
     >
       <div
         className="
-          h-[350px] flex flex-col justify-between
+          h-87.5 flex flex-col justify-between
           bg-white border border-slate-200
           rounded-2xl p-6
           shadow-sm hover:shadow-md
@@ -157,11 +145,11 @@ export function HorizontalFeatures() {
           flex items-center justify-between border-b border-[#e8e6e1]
         `}
           style={{ height: 52, background: '#fafaf8' }}>
-          <span className="text-[10.5px] font-medium tracking-[0.1em] uppercase text-[#999]">
+          <span className="text-[10.5px] font-medium tracking-widest uppercase text-[#999]">
             {isMobile ? 'Modules' : 'iSchool — Core Modules'}
           </span>
           <span className="flex items-center gap-2 text-[10.5px] font-medium text-[#444]">
-            <span className="w-[5px] h-[5px] rounded-full bg-[#c9000a] animate-pulse" />
+            <span className="w-1.25 h-1.25 rounded-full bg-[#c9000a] animate-pulse" />
             {moduleFeatures.length} {isMobile ? 'Modules' : 'integrated modules'}
           </span>
         </div>
@@ -191,10 +179,10 @@ export function HorizontalFeatures() {
             >
               Powerful<br /><em className="italic text-[#c9000a]">Modules</em><br />Built&nbsp;to Scale
             </h2>
-            <p className="text-sm leading-[1.8] text-[#444] font-light max-w-[210px] mb-7">
+            <p className="text-sm leading-[1.8] text-[#444] font-light max-w-52.5 mb-7">
               The core pillars that make iSchool the most comprehensive school management platform.
             </p>
-            <div className="inline-flex items-center gap-2.5 px-[18px] py-2.5 bg-white border border-[#e8e6e1] rounded-full text-[11px] font-medium text-[#444]">
+            <div className="inline-flex items-center gap-2.5 px-4.5 py-2.5 bg-white border border-[#e8e6e1] rounded-full text-[11px] font-medium text-[#444]">
               <strong className="text-[15px] font-bold text-[#0d0d0d]">{moduleFeatures.length}</strong> integrated modules
             </div>
           </div>
@@ -214,7 +202,7 @@ export function HorizontalFeatures() {
                 <motion.div
                   animate={{ x: [0, 6, 0] }}
                   transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-[26px] h-[26px] rounded-full border border-[#e8e6e1] flex items-center justify-center flex-shrink-0"
+                  className="w-6.5 h-6.5 rounded-full border border-[#e8e6e1] flex items-center justify-center shrink-0"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M5 12h14M12 5l7 7-7 7" />
@@ -241,17 +229,17 @@ export function HorizontalFeatures() {
           {/* Fades - hidden on mobile for better scrolling experience */}
           {!isMobile && (
             <>
-              <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none bg-gradient-to-r from-[#fafaf8] to-transparent" />
-              <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none bg-gradient-to-l from-[#fafaf8] to-transparent" />
+              <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none bg-linear-to-r from-[#fafaf8] to-transparent" />
+              <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none bg-linear-to-l from-[#fafaf8] to-transparent" />
             </>
           )}
 
           <div
             ref={trackRef}
-            className={`flex items-center gap-6 ${isMobile ? 'px-6 py-10' : 'h-full px-[80px] px-[60px]'}`}
+            className={`flex items-center gap-6 ${isMobile ? 'px-6 py-10' : 'h-full px-20'}`}
           >
             {moduleFeatures.map((mod, i) => (
-              <div key={i} className={isMobile ? 'min-w-[280px] sm:min-w-[320px]' : ''}>
+              <div key={i} className={isMobile ? 'min-w-70 sm:min-w-[320px]' : ''}>
                 <ModuleCard module={mod} index={i} />
               </div>
             ))}

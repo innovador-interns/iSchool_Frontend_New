@@ -172,7 +172,7 @@ function MagneticButton({ children, primary = false, delay = 0, onClick }) {
   }
 
   return (
-    <motion.button
+    <motion.a
       ref={btnRef}
       initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -202,7 +202,7 @@ function MagneticButton({ children, primary = false, delay = 0, onClick }) {
         `}
       />
       {children}
-    </motion.button>
+    </motion.a>
   )
 }
 
@@ -401,7 +401,7 @@ export function Hero() {
                   animate-[pulse_2s_ease-in-out_infinite]
                 " />
                 <span className="text-[11px] font-semibold text-[#005280] uppercase tracking-widest">
-                  Next-Gen School ERP Platform
+                  Welcome to iSchool
                 </span>
               </motion.div>
 
@@ -445,13 +445,13 @@ export function Hero() {
                   Get Started Free
                 </MagneticButton>
 
-                <MagneticButton delay={1.4}>
+                {/* <MagneticButton delay={1.4}>
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="8" cy="8" r="7" />
                     <polygon points="6.5 5 11 8 6.5 11" fill="currentColor" stroke="none" />
                   </svg>
                   Watch Demo
-                </MagneticButton>
+                </MagneticButton> */}
               </div>
 
               {/* Stats row */}
@@ -677,84 +677,6 @@ export function Hero() {
             <FeatureCard key={i} feature={f} index={i} />
           ))}
         </div>
-
-        {/* Dashboard preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 80, rotateX: 20 }}
-          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-          transition={{ duration: 1.4, ease: EXPO }}
-          viewport={{ once: true, margin: "-60px" }}
-          className="
-            mt-20 rounded-3xl overflow-hidden
-            border border-slate-200
-            bg-white/80 backdrop-blur-2xl
-            shadow-[0_20px_60px_rgba(0,82,128,0.08)]
-          "
-          style={{ transformStyle: "preserve-3d" }}
-        >
-          {/* Window chrome */}
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100 bg-slate-50/80">
-            <div className="w-3 h-3 rounded-full bg-[#ff5f57] border border-black/10" />
-            <div className="w-3 h-3 rounded-full bg-[#febc2e] border border-black/10" />
-            <div className="w-3 h-3 rounded-full bg-[#28c840] border border-black/10" />
-            <div className="flex-1 text-center text-[11px] text-slate-400 font-mono font-medium">
-              dashboard.ischool.app
-            </div>
-          </div>
-
-          {/* Mini dashboard */}
-          <div className="p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              {[
-                { label: "Students", val: "3,241", trend: "+12%", color: "text-[#005280]" },
-                { label: "Staff", val: "184", trend: "+3%", color: "text-[#005280]" },
-                { label: "Revenue", val: "$84k", trend: "+22%", color: "text-[#C90606]" },
-                { label: "Attendance", val: "96.4%", trend: "+1.2%", color: "text-[#005280]" },
-              ].map((s, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  whileHover={{ y: -6, scale: 1.03, borderColor: "#005280" }}
-                  transition={{ duration: 0.6, delay: 0.2 + i * 0.1, ease: EXPO }}
-                  viewport={{ once: true, margin: "-20px" }}
-                  className="p-4 rounded-xl bg-white border border-slate-100 shadow-sm transition-colors duration-300 cursor-pointer"
-                >
-                  <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-2">{s.label}</div>
-                  <div className="text-xl font-black text-slate-800">{s.val}</div>
-                  <div className={`text-[11px] font-bold ${s.color} mt-1`}>{s.trend}</div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Bar chart */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 shadow-inner">
-              <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-3">Enrollment Trends</div>
-              <div className="flex items-end gap-1.5 h-16">
-                {[55, 70, 58, 82, 68, 90, 76, 95, 82, 100, 88, 96].map((h, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ scaleY: 0 }}
-                    whileInView={{ scaleY: 1 }}
-                    transition={{ delay: 0.04 * i, duration: 0.5, ease: EXPO }}
-                    viewport={{ once: true }}
-                    className="flex-1 rounded-sm origin-bottom"
-                    style={{
-                      height: `${h}%`,
-                      background: `linear-gradient(to top, #C90606, #005280)`,
-                      opacity: 0.5 + (i / 11) * 0.5,
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="flex justify-between mt-1.5">
-                {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(m => (
-                  <span key={m} className="text-[8px] text-slate-400 font-medium flex-1 text-center">{m}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
 
       {/* ── KEYFRAMES (scoped via style tag) ── */}
