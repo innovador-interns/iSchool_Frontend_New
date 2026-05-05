@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { FaFacebook, FaLinkedin } from 'react-icons/fa'
 import { NavLink } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
+import innovadorLogo from '../assets/innovadorsolutions.png';
 
 function Footer() {
   const footerRef = useRef(null)
@@ -256,9 +257,9 @@ function Footer() {
         {/* BOTTOM */}
         <div className="mt-24 border-t border-[#e2e8f0] pt-6 flex justify-between text-xs text-[#64748b]">
           <p>© 2026 iSchool</p>
-          <p className="text-[#c9000a] font-semibold">
-            Powered by Innovador Solutions
-          </p>
+          <a href='https://www.innovadorsolutions.com/' target="_blank" className="text-black text-md font-semibold flex items-center gap-2">
+            Powered by <img src={innovadorLogo} alt="iSchool" className="h-8 w-auto object-contain lg:h-6" />
+          </a>
         </div>
 
       </div>

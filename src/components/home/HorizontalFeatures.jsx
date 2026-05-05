@@ -175,7 +175,7 @@ export function HorizontalFeatures() {
             </div>
             <h2
               className="leading-[1.06] tracking-[-0.02em] mb-5 text-[#0d0d0d]"
-              style={{ fontFamily: "'Instrument Serif',Georgia,serif", fontSize: 'clamp(2.4rem,3.2vw,3.6rem)' }}
+              style={{ fontSize: 'clamp(2.4rem,3.2vw,3.6rem)' }}
             >
               Powerful<br /><em className="italic text-[#c9000a]">Modules</em><br />Built&nbsp;to Scale
             </h2>

@@ -284,7 +284,9 @@ export function WhyISchool() {
       </motion.div>
 
       {/* DESKTOP */}
-      {!isMobile && (
+      <div
+        className={isMobile ? 'hidden' : 'block'}
+      >
         <div
           ref={stickyRef}
           className="relative w-full h-screen overflow-hidden"
@@ -506,10 +508,10 @@ export function WhyISchool() {
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* MOBILE */}
-      {isMobile && (
+      <div className={isMobile ? 'block' : 'hidden'}>
         <section
           className="relative py-24 px-5 overflow-hidden"
           style={{ background: CREAM }}
@@ -559,7 +561,7 @@ export function WhyISchool() {
           </div>
 
           {/* Mobile cards — vertical grid */}
-          <div className="mobile-grid relative z-10 flex flex-col gap-5">
+          <div className="mobile-grid relative z-10 flex flex-col items-center gap-5">
             {lists.map((item, i) => (
               <motion.div
                 key={i}
@@ -598,7 +600,7 @@ export function WhyISchool() {
             </motion.a>
           </motion.div>
         </section>
-      )}
+      </div>
     </div>
   )
 }

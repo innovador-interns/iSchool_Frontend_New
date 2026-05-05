@@ -37,17 +37,34 @@ export const lists = [
   { img: list6, title: "Reduces Teacher's Workload", desc: "iSchool enhances efficiency, allowing teachers to complete complex tasks with simple clicks." },
 ]
 
+import { 
+  Building2, Users, UserCheck, UsersRound, GraduationCap, CreditCard, Bell, 
+  Mail, CalendarDays, HeartPulse, ClipboardCheck, Library, ArrowLeftRight, Video,
+  BookOpen, FileText, Megaphone, Clock, Calendar, ShieldAlert, FileSpreadsheet, 
+  PenTool, FileBarChart, PieChart, Globe, Laptop, Book, Pen, ClipboardList, 
+  BellRing, FileBadge, LineChart, Gift, BarChart
+} from 'lucide-react'
+
 export const featuresNotice = [
   {
     dialogueImage: dialogue1, image: notice1,
     title: 'Administration & Management',
     accent: '#0ea5e9',
     list: [
-      "Campus Management", "Manage Student & Alumni", "Manage Teacher & Staff Profile",
-      "Manage Parents' Profile", "Admissions", "Fee Management", "Announcement & Newsletter",
-      "Communication by SMS & Email", "Manage Events & Birthday Updates",
-      "Health Record Management System", "Attendance System", "Library Management",
-      "Data Import & Export", "Integrated with Google Meet & Drive",
+      { text: "Campus Management", icon: Building2 },
+      { text: "Manage Student & Alumni", icon: Users },
+      { text: "Manage Teacher & Staff Profile", icon: UserCheck },
+      { text: "Manage Parents' Profile", icon: UsersRound },
+      { text: "Admissions", icon: GraduationCap },
+      { text: "Fee Management", icon: CreditCard },
+      { text: "Announcement & Newsletter", icon: Bell },
+      { text: "Communication by SMS & Email", icon: Mail },
+      { text: "Manage Events & Birthday Updates", icon: CalendarDays },
+      { text: "Health Record Management System", icon: HeartPulse },
+      { text: "Attendance System", icon: ClipboardCheck },
+      { text: "Library Management", icon: Library },
+      { text: "Data Import & Export", icon: ArrowLeftRight },
+      { text: "Integrated with Google Meet & Drive", icon: Video },
     ],
   },
   {
@@ -55,10 +72,19 @@ export const featuresNotice = [
     title: 'Teachers',
     accent: '#f59e0b',
     list: [
-      "Manage Classes & Subjects", "Students' online Attendance", "Homework & Assignments",
-      "Class Announcements", "Classes Schedule", "Events & Birthday Updates", "Behavior & Discipline",
-      "Examination Management", "Grading & Assignments", "Transcript & Progress Reports",
-      "Academic Reports", "Integrated with Google Meet & Drive", "Learning Management System",
+      { text: "Manage Classes & Subjects", icon: BookOpen },
+      { text: "Students' online Attendance", icon: UserCheck },
+      { text: "Homework & Assignments", icon: FileText },
+      { text: "Class Announcements", icon: Megaphone },
+      { text: "Classes Schedule", icon: Clock },
+      { text: "Events & Birthday Updates", icon: Calendar },
+      { text: "Behavior & Discipline", icon: ShieldAlert },
+      { text: "Examination Management", icon: FileSpreadsheet },
+      { text: "Grading & Assignments", icon: PenTool },
+      { text: "Transcript & Progress Reports", icon: FileBarChart },
+      { text: "Academic Reports", icon: PieChart },
+      { text: "Integrated with Google Meet & Drive", icon: Globe },
+      { text: "Learning Management System", icon: Laptop },
     ],
   },
   {
@@ -66,9 +92,15 @@ export const featuresNotice = [
     title: 'Students',
     accent: '#10b981',
     list: [
-      "Gradebook", "Interactive Assignments", "Access to Classes Schedule & Subject",
-      "Attendance Record", "Announcement & Notifications", "Academic Reports",
-      "Progress Report", "Events & Birthday Updates", "Integrated with Google Meet & Drive",
+      { text: "Gradebook", icon: Book },
+      { text: "Interactive Assignments", icon: Pen },
+      { text: "Access to Classes Schedule & Subject", icon: Calendar },
+      { text: "Attendance Record", icon: ClipboardList },
+      { text: "Announcement & Notifications", icon: BellRing },
+      { text: "Academic Reports", icon: FileBadge },
+      { text: "Progress Report", icon: LineChart },
+      { text: "Events & Birthday Updates", icon: Gift },
+      { text: "Integrated with Google Meet & Drive", icon: Video },
     ],
   },
   {
@@ -76,8 +108,13 @@ export const featuresNotice = [
     title: 'Parents',
     accent: '#8b5cf6',
     list: [
-      "Grade Book", "Interactive Assignments", "Access to Classes Schedules & Subject",
-      "School Attendance", "Progress Report", "Announcement & Notifications", "Academic Reports",
+      { text: "Grade Book", icon: Book },
+      { text: "Interactive Assignments", icon: Pen },
+      { text: "Access to Classes Schedules & Subject", icon: Calendar },
+      { text: "School Attendance", icon: UserCheck },
+      { text: "Progress Report", icon: BarChart },
+      { text: "Announcement & Notifications", icon: BellRing },
+      { text: "Academic Reports", icon: FileText },
     ],
   },
 ]

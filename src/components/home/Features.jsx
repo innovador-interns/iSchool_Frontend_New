@@ -1,111 +1,81 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion'
+import React, { useRef, useEffect, useLayoutEffect, useState } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
-import formImg from '../../assets/form-img.png'
 import { featuresNotice } from './data'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
-// DESIGN TOKENS — light theme with brand colors─
-const BLUE = '#005280'   // --primary-blue
-const RED = '#C90606'   // --primary-red
+// TOKENS─
+const BLUE = '#005280'
+const RED = '#C90606'
 const WHITE = '#FFFFFF'
-const BG = '#F7F5F1'   // warm off-white
-const DARK = '#1A1A1A'   // --text-dark
-const MUTED = '#666666'   // --text-light
+const BG = '#F8F6F2'
+const DARK = '#1A1A1A'
+const MUTED = '#666666'
 const BORDER = 'rgba(0,82,128,0.10)'
 
-// MAGNETIC CURSOR─
-// BUG FIX: use mouseover/mouseout (which bubble correctly per element) instead of
-// mouseenter/mouseleave on document. On mouseout we check relatedTarget — if it
-// is still inside the same [data-cursor] element, we stay active; otherwise clear.
+// Per-module personality — accent, emoji, category label
+const THEMES = [
+  { accent: BLUE, light: `${BLUE}09`, label: 'Core', num: '01' },
+  { accent: RED, light: `${RED}08`, label: 'Comms', num: '02' },
+  { accent: '#1a7a4a', light: '#1a7a4a09', label: 'Analytics', num: '03' },
+  { accent: '#7c3aed', light: '#7c3aed09', label: 'Learning', num: '04' },
+]
+
+// CURSOR─
 function MagneticDot() {
-  const dotRef = useRef(null)
-  const ringRef = useRef(null)
-  const mouse = useRef({ x: -200, y: -200 })
-  const pos = useRef({ x: -200, y: -200 })
+  const dot = useRef(null)
+  const ring = useRef(null)
+  const m = useRef({ x: -300, y: -300 })
+  const p = useRef({ x: -300, y: -300 })
   const raf = useRef(null)
-  const [label, setLabel] = useState('')
+  const [lbl, setLbl] = useState('')
 
   useEffect(() => {
-    const onMove = (e) => { mouse.current = { x: e.clientX, y: e.clientY } }
-    window.addEventListener('mousemove', onMove)
+    const mv = (e) => { m.current = { x: e.clientX, y: e.clientY } }
+    window.addEventListener('mousemove', mv)
 
-    // Lagged dot, direct ring
     const loop = () => {
-      pos.current.x += (mouse.current.x - pos.current.x) * 0.12
-      pos.current.y += (mouse.current.y - pos.current.y) * 0.12
-      if (dotRef.current)
-        dotRef.current.style.transform = `translate(${pos.current.x - 5}px,${pos.current.y - 5}px)`
-      if (ringRef.current)
-        ringRef.current.style.transform = `translate(${mouse.current.x - 20}px,${mouse.current.y - 20}px)`
+      p.current.x += (m.current.x - p.current.x) * 0.11
+      p.current.y += (m.current.y - p.current.y) * 0.11
+      dot.current && (dot.current.style.transform = `translate(${p.current.x - 5}px,${p.current.y - 5}px)`)
+      ring.current && (ring.current.style.transform = `translate(${m.current.x - 22}px,${m.current.y - 22}px)`)
       raf.current = requestAnimationFrame(loop)
     }
     raf.current = requestAnimationFrame(loop)
 
-    // mouseover fires when entering ANY [data-cursor] descendant
-    const onOver = (e) => {
-      const t = e.target.closest('[data-cursor]')
-      if (t) setLabel(t.getAttribute('data-cursor'))
-    }
-    // mouseout fires when leaving an element — check relatedTarget
-    const onOut = (e) => {
-      const t = e.target.closest('[data-cursor]')
-      if (!t) return
-      // if where we moved to is still inside the same target, keep label
-      if (t.contains(e.relatedTarget)) return
-      setLabel('')
-    }
-
-    document.addEventListener('mouseover', onOver)
-    document.addEventListener('mouseout', onOut)
-
+    const over = (e) => { const t = e.target.closest('[data-cursor]'); if (t) setLbl(t.dataset.cursor) }
+    const out = (e) => { const t = e.target.closest('[data-cursor]'); if (t && !t.contains(e.relatedTarget)) setLbl('') }
+    document.addEventListener('mouseover', over)
+    document.addEventListener('mouseout', out)
     return () => {
-      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mousemove', mv)
       cancelAnimationFrame(raf.current)
-      document.removeEventListener('mouseover', onOver)
-      document.removeEventListener('mouseout', onOut)
+      document.removeEventListener('mouseover', over)
+      document.removeEventListener('mouseout', out)
     }
   }, [])
 
-  const active = Boolean(label)
-
+  const on = Boolean(lbl)
   return (
     <>
-      <div
-        ref={ringRef}
-        className="fixed top-0 left-0 z-9999 pointer-events-none hidden lg:flex items-center justify-center"
-        style={{ width: 40, height: 40 }}
-      >
+      <div ref={ring} className="fixed top-0 left-0 z-9999 pointer-events-none hidden lg:flex items-center justify-center" style={{ width: 44, height: 44 }}>
         <div
-          className="w-full h-full rounded-full border-2 flex items-center justify-center overflow-hidden"
-          style={{
-            borderColor: active ? RED : `${BLUE}55`,
-            background: active ? `${RED}10` : 'transparent',
-            transform: active ? 'scale(1.35)' : 'scale(1)',
-            transition: 'border-color 0.22s, background 0.22s, transform 0.22s',
-          }}
+          className="w-full h-full rounded-full border-2 flex items-center justify-center"
+          style={{ borderColor: on ? RED : `${BLUE}50`, background: on ? `${RED}10` : 'transparent', transform: on ? 'scale(1.3)' : 'scale(1)', transition: 'all 0.2s ease' }}
         >
-          {active && (
-            <span className="text-[7.5px] font-black uppercase tracking-widest px-1 whitespace-nowrap" style={{ color: RED }}>
-              {label}
-            </span>
-          )}
+          {on && <span className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap" style={{ color: RED }}>{lbl}</span>}
         </div>
       </div>
-      <div
-        ref={dotRef}
-        className="fixed top-0 left-0 z-9999 pointer-events-none w-2.5 h-2.5 rounded-full hidden lg:block"
-        style={{ background: active ? RED : BLUE, transition: 'background 0.18s' }}
-      />
+      <div ref={dot} className="fixed top-0 left-0 z-9999 pointer-events-none w-2.5 h-2.5 rounded-full hidden lg:block" style={{ background: on ? RED : BLUE, transition: 'background 0.18s' }} />
     </>
   )
 }
 
 // ANIMATED SVG UNDERLINE
-function AnimUnderline({ color = RED, delay = 0.5 }) {
+function Underline({ color = RED, delay = 0.5 }) {
   return (
     <svg className="absolute -bottom-2 left-0 w-full overflow-visible" viewBox="0 0 300 8" preserveAspectRatio="none">
       <motion.path
@@ -120,624 +90,592 @@ function AnimUnderline({ color = RED, delay = 0.5 }) {
   )
 }
 
-// FEATURE ROW─
-function FeatureRow({ feat, index, onClick, isActive }) {
-  const [hovered, setHovered] = useState(false)
-  const num = String(index + 1).padStart(2, '0')
-
+// SINGLE MODULE PANEL (stacked in sticky, GSAP drives opacity/transforms)
+function ModulePanel({ feat, index, theme, total }) {
+  const items = feat.list ?? []
   return (
-    <motion.div
-      data-cursor="Open"
-      className="feat-row relative flex items-center cursor-none overflow-hidden"
-      onClick={() => onClick(feat)}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      style={{
-        borderBottom: `1px solid ${hovered || isActive ? `${BLUE}18` : 'rgba(0,0,0,0.07)'}`,
-        paddingTop: 26,
-        paddingBottom: 26,
-        transition: 'border-color 0.4s ease',
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={`Open ${feat.title} features`}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick(feat)}
+    <div
+      className={`mp-${index} absolute inset-0 flex items-center`}
+      style={{ opacity: 0, pointerEvents: 'none', willChange: 'opacity' }}
     >
-      {/* Active left stripe */}
-      <motion.div
-        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full"
-        style={{ background: isActive ? RED : BLUE, transformOrigin: 'top' }}
-        animate={{ scaleY: isActive ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      />
+      <div className="w-full max-w-[1360px] mx-auto px-6 sm:px-14 lg:px-20">
+        <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-12 lg:gap-20 items-center min-h-[60vh]">
 
-      {/* Hover bg sweep */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        animate={{ opacity: hovered ? 1 : 0, x: hovered ? 0 : -16 }}
-        transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-        style={{ background: `linear-gradient(90deg, ${BLUE}07, transparent)` }}
-      />
+          {/*  LEFT: Module identity */}
+          <div className="flex flex-col gap-7">
 
-      {/* Index */}
-      <span
-        className="relative z-10 shrink-0 text-[11px] font-black tracking-[0.2em] select-none"
-        style={{
-          width: 44,
-          color: hovered || isActive ? RED : 'rgba(0,0,0,0.18)',
-          transition: 'color 0.3s',
-          fontFamily: "'Outfit', sans-serif",
-        }}
-      >
-        {num}
-      </span>
-
-      {/* Icon */}
-      <motion.div
-        className="relative z-10 shrink-0 w-11 h-11 rounded-xl flex items-center justify-center mr-5"
-        animate={{
-          background: hovered || isActive ? `${BLUE}10` : BG,
-          rotate: hovered ? 6 : 0,
-          scale: hovered ? 1.08 : 1,
-        }}
-        style={{ border: `1px solid ${hovered || isActive ? `${BLUE}22` : 'rgba(0,0,0,0.07)'}`, transition: 'border-color 0.35s' }}
-        transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {feat.image ? (
-          <img
-            src={feat.image}
-            alt=""
-            className="w-6 h-6 object-contain"
-            style={{
-              filter: hovered || isActive
-                ? 'invert(22%) sepia(91%) saturate(684%) hue-rotate(174deg) brightness(80%)'
-                : 'grayscale(30%) opacity(0.55)',
-              transition: 'filter 0.35s',
-            }}
-          />
-        ) : (
-          <span style={{ color: hovered ? BLUE : MUTED, transition: 'color 0.3s', fontSize: 16 }}>✦</span>
-        )}
-      </motion.div>
-
-      {/* Text */}
-      <div className="relative z-10 flex-1 min-w-0">
-        <motion.h3
-          className="text-[0.95rem] font-bold leading-snug truncate"
-          animate={{ color: hovered || isActive ? BLUE : DARK }}
-          transition={{ duration: 0.28 }}
-          style={{ fontFamily: "'Outfit', sans-serif" }}
-        >
-          {feat.title}
-        </motion.h3>
-        <motion.p
-          className="text-xs mt-0.5 truncate"
-          animate={{ color: hovered ? MUTED : 'rgba(0,0,0,0.32)' }}
-          transition={{ duration: 0.28 }}
-        >
-          {Array.isArray(feat.list) ? `${feat.list.length} sub-features` : 'Feature set'}
-        </motion.p>
-      </div>
-
-      {/* Status chip */}
-      <motion.div
-        className="relative z-10 shrink-0 ml-4 hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.18em]"
-        animate={{
-          background: isActive ? `${RED}0E` : hovered ? `${BLUE}08` : 'rgba(0,0,0,0.04)',
-          color: isActive ? RED : hovered ? BLUE : 'rgba(0,0,0,0.28)',
-          borderColor: isActive ? `${RED}28` : hovered ? `${BLUE}20` : 'rgba(0,0,0,0.07)',
-        }}
-        style={{ border: '1px solid' }}
-        transition={{ duration: 0.28 }}
-      >
-        {isActive && <span className="w-1 h-1 rounded-full bg-current animate-pulse" />}
-        {isActive ? 'Active' : 'Explore'}
-      </motion.div>
-
-      {/* Arrow */}
-      <motion.svg
-        className="relative z-10 ml-4 shrink-0"
-        width="16" height="16" viewBox="0 0 24 24" fill="none"
-        strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-        animate={{ stroke: hovered || isActive ? BLUE : 'rgba(0,0,0,0.22)', x: hovered ? 5 : 0, opacity: hovered || isActive ? 1 : 0.45 }}
-        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <path d="M5 12h14M12 5l7 7-7 7" />
-      </motion.svg>
-    </motion.div>
-  )
-}
-
-// FEATURE DRAWER──
-function FeatureDrawer({ feature, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    document.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-    }
-  }, [onClose])
-
-  const accent = feature.accent ?? BLUE
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-50 flex"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-    >
-      {/* Backdrop */}
-      <motion.div
-        className="absolute inset-0"
-        style={{ background: 'rgba(26,26,26,0.4)', backdropFilter: 'blur(6px)' }}
-        onClick={onClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      />
-
-      {/* Panel */}
-      <motion.div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="drawer-title"
-        className="absolute right-0 top-0 bottom-0 w-full max-w-[460px] flex flex-col overflow-hidden"
-        style={{ background: WHITE, borderLeft: `1px solid ${BORDER}`, boxShadow: `-24px 0 80px rgba(0,82,128,0.10)` }}
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ type: 'spring', stiffness: 340, damping: 38, mass: 0.9 }}
-      >
-        {/* Header */}
-        <div
-          className="relative shrink-0 overflow-hidden"
-          style={{
-            background: `linear-gradient(150deg, ${accent}0C 0%, ${WHITE} 100%)`,
-            borderBottom: `1px solid ${BORDER}`,
-          }}
-        >
-          <div
-            className="absolute -top-16 -right-16 w-56 h-56 rounded-full pointer-events-none"
-            style={{ background: `${accent}0C`, filter: 'blur(40px)' }}
-          />
-
-          <div className="relative z-10 p-7 pb-6">
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-[9px] font-black uppercase tracking-[0.28em]" style={{ color: accent }}>
-                Feature Overview
-              </span>
-              <motion.button
-                onClick={onClose}
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)' }}
-                whileHover={{ scale: 1.1, background: `${RED}10`, borderColor: `${RED}22` }}
-                whileTap={{ scale: 0.9 }}
-                aria-label="Close panel"
+            {/* Tag row */}
+            <div className="flex items-center gap-4 flex-wrap">
+              <div
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.22em]"
+                style={{ background: `${theme.accent}0D`, color: theme.accent, border: `1px solid ${theme.accent}22` }}
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </motion.button>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <motion.div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-                style={{ background: `${accent}10`, border: `1px solid ${accent}22` }}
-                initial={{ scale: 0.7, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.08, duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {feature.image ? (
-                  <img
-                    src={feature.image}
-                    alt=""
-                    className="w-8 h-8 object-contain"
-                    style={{
-                      filter: accent === BLUE
-                        ? 'invert(22%) sepia(91%) saturate(684%) hue-rotate(174deg) brightness(80%)'
-                        : 'invert(13%) sepia(90%) saturate(6271%) hue-rotate(2deg) brightness(90%)',
-                    }}
-                  />
-                ) : <span style={{ fontSize: 22 }}>✦</span>}
-              </motion.div>
-
-              <div className="pt-0.5">
-                <h2
-                  id="drawer-title"
-                  className="text-xl font-black leading-snug"
-                  style={{ color: DARK, fontFamily: "'Outfit', sans-serif" }}
-                >
-                  {feature.title}
-                </h2>
-                <p className="text-xs mt-1" style={{ color: MUTED }}>
-                  {Array.isArray(feature.list) ? feature.list.length : 0} capabilities included
-                </p>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: theme.accent }} />
+                {theme.label}
               </div>
+              <span className="text-[11px] font-black tracking-[0.24em] uppercase" style={{ color: 'rgba(0,0,0,0.2)', fontFamily: "'Outfit',sans-serif" }}>
+                {theme.num} / {String(total).padStart(2, '0')}
+              </span>
             </div>
 
-            <div className="mt-6 h-px" style={{ background: `linear-gradient(90deg, ${accent}35, transparent)` }} />
+            {/* Big emoji */}
+            <div className={`mp-emoji-${index} text-[5rem] leading-none`}>{theme.emoji}</div>
+
+            {/* Module title — GSAP SplitText target */}
+            <h3
+              className={`mp-title-${index} text-[2.4rem] lg:text-[3.2rem] xl:text-[3.8rem] font-black leading-[1.05] tracking-tight`}
+              style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}
+            >
+              {feat.title}
+            </h3>
+
+            {/* Accent rule */}
+            <div className={`mp-rule-${index} flex items-center gap-2 h-[3px]`} style={{ opacity: 0 }}>
+              <div className="h-full w-14 rounded-full" style={{ background: theme.accent }} />
+              <div className="h-full w-5 rounded-full" style={{ background: `${theme.accent}45` }} />
+              <div className="h-full w-2.5 rounded-full" style={{ background: `${theme.accent}22` }} />
+            </div>
+
+            {/* Count badge */}
+            <div
+              className={`mp-badge-${index} inline-flex items-center gap-3 px-5 py-3 rounded-2xl w-fit`}
+              style={{ background: `${theme.accent}09`, border: `1px solid ${theme.accent}1A`, opacity: 0 }}
+            >
+              <span className="text-3xl font-black" style={{ color: theme.accent, fontFamily: "'Outfit',sans-serif" }}>
+                {items.length}
+              </span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: MUTED }}>
+                Capabilities
+              </span>
+            </div>
+          </div>
+
+          {/*  RIGHT: Features list */}
+          <div className="flex flex-col gap-2.5">
+            <div
+              className="flex items-center justify-between pb-3 mb-1"
+              style={{ borderBottom: `1px solid rgba(0,0,0,0.07)` }}
+            >
+              <span className="text-[9px] font-black uppercase tracking-[0.28em]" style={{ color: 'rgba(0,0,0,0.28)' }}>
+                Included Capabilities
+              </span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: theme.accent }}>
+                {items.length} features
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-8 mt-10 max-w-5xl mx-auto">
+              {items.map((item, j) => {
+                // Tightened offsets to prevent overlapping
+                const xOff = [0, 8, -10, 12, -7, 14, -9, 6, -11, 8, -5, 10, -13, 7, -8, 4, 9, -7, 12, -4][j % 20];
+                const yOff = [0, 3, -4, 2, -5, 4, -3, 5, -2, 4, -3, 2, -6, 3, -4, 1, -5, 3, -2, 1][j % 20];
+
+                return (
+                  <div
+                    key={j}
+                    className={`mf-${index}-${j} group relative px-4 py-2 rounded-full transition-all duration-500 hover:z-10`}
+                    style={{
+                      background: WHITE,
+                      border: `1px solid ${BORDER}`,
+                      boxShadow: `0 8px 25px -5px ${theme.accent}08`,
+                      opacity: 0,
+                      transform: `translate(${xOff + 20}px, ${yOff}px)`,
+                      willChange: 'transform, opacity',
+                      backdropFilter: 'blur(4px)',
+                    }}
+                  >
+                    {/* Floating glow effect */}
+                    <div
+                      className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 blur-md -z-10"
+                      style={{ background: `${theme.accent}15`, transform: 'scale(1.15)' }}
+                    />
+
+                    <div className="flex items-center gap-3">
+                      {item?.icon && (
+                        <item.icon
+                          size={18}
+                          strokeWidth={2.5}
+                          style={{ color: theme.accent }}
+                          className="shrink-0 transition-transform duration-300 group-hover:scale-110"
+                        />
+                      )}
+                      <span
+                        className="text-[14px] leading-none font-bold tracking-tight whitespace-nowrap transition-colors duration-300 group-hover:text-black"
+                        style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}
+                      >
+                        {typeof item === 'string' ? item : item?.text}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
-
-        {/* Scrollable list */}
-        <div className="flex-1 overflow-y-auto custom-scroll p-7 pt-5">
-          <p className="text-[9px] font-black uppercase tracking-[0.26em] mb-5" style={{ color: 'rgba(0,0,0,0.28)' }}>
-            Everything included
-          </p>
-          <ul className="space-y-2.5">
-            {(feature.list ?? []).map((item, i) => (
-              <motion.li
-                key={i}
-                className="flex items-start gap-3 p-4 rounded-2xl"
-                style={{ background: BG, border: '1px solid rgba(0,0,0,0.05)' }}
-                initial={{ opacity: 0, x: 18 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.06 + i * 0.035, duration: 0.44, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ background: `${accent}07`, borderColor: `${accent}18`, x: 4, transition: { duration: 0.22 } }}
-              >
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: `${accent}14`, border: `1px solid ${accent}25` }}
-                >
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                </div>
-                <span className="text-sm leading-relaxed" style={{ color: DARK }}>
-                  {item}
-                </span>
-              </motion.li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Footer CTA */}
-        <div className="shrink-0 p-6" style={{ borderTop: `1px solid ${BORDER}` }}>
-          <motion.a
-            href="https://www.innovadorsolutions.com/?fluent-form=7"
-            target="_blank"
-            rel="noreferrer"
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-sm font-bold text-white relative overflow-hidden"
-            style={{
-              background: `linear-gradient(120deg, ${BLUE} 0%, ${RED} 160%)`,
-              boxShadow: `0 10px 36px ${BLUE}25`,
-            }}
-            whileHover={{ scale: 1.02, y: -1 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <motion.div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)' }}
-              initial={{ x: '-150%' }}
-              whileHover={{ x: '150%' }}
-              transition={{ duration: 0.55 }}
-            />
-            <span className="relative z-10">Get Started with iSchool</span>
-            <svg className="relative z-10" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </motion.a>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-// IMAGE SHOWCASE──
-function ImageShowcase() {
-  const ref = useRef(null)
-  const mx = useMotionValue(0)
-  const my = useMotionValue(0)
-  const rx = useSpring(useTransform(my, [-0.5, 0.5], [10, -10]), { stiffness: 180, damping: 28 })
-  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-10, 10]), { stiffness: 180, damping: 28 })
-
-  const onMouse = (e) => {
-    const r = ref.current.getBoundingClientRect()
-    mx.set((e.clientX - r.left) / r.width - 0.5)
-    my.set((e.clientY - r.top) / r.height - 0.5)
-  }
-
-  return (
-    <motion.div
-      ref={ref}
-      onMouseMove={onMouse}
-      onMouseLeave={() => { mx.set(0); my.set(0) }}
-      style={{ rotateX: rx, rotateY: ry, transformStyle: 'preserve-3d', perspective: 900 }}
-      className="relative w-full"
-    >
-      {/* Main card */}
-      <div
-        className="relative rounded-4xl overflow-hidden"
-        style={{
-          background: WHITE,
-          border: `1px solid ${BORDER}`,
-          boxShadow: `0 28px 72px -16px ${BLUE}16, 0 0 0 1px rgba(0,82,128,0.04)`,
-        }}
-      >
-        {/* Browser chrome */}
-        <div
-          className="flex items-center gap-2 px-5 py-3.5"
-          style={{ borderBottom: `1px solid rgba(0,0,0,0.07)`, background: BG }}
-        >
-          <div className="flex gap-1.5">
-            {['#FF5F57', '#FEBC2E', '#28C840'].map(c => (
-              <div key={c} className="w-3 h-3 rounded-full" style={{ background: c }} />
-            ))}
-          </div>
-          <div className="flex-1 mx-4 h-6 rounded-md flex items-center px-3" style={{ background: 'rgba(0,0,0,0.05)' }}>
-            <span className="text-[10px] font-semibold" style={{ color: 'rgba(0,0,0,0.3)' }}>
-              app.ischool.io/dashboard
-            </span>
-          </div>
-        </div>
-
-        <motion.img
-          src={formImg}
-          alt="iSchool dashboard"
-          className="w-full h-auto block"
-          animate={{ y: [0, -5, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        />
-
-        <div
-          className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
-          style={{ background: `linear-gradient(to top, ${WHITE}E0, transparent)` }}
-        />
       </div>
-
-      {/* Live badge */}
-      <motion.div
-        className="absolute -bottom-4 -right-3 flex items-center gap-3 px-5 py-3.5 rounded-2xl"
-        style={{
-          background: WHITE,
-          border: `1px solid ${BORDER}`,
-          boxShadow: `0 10px 36px ${BLUE}12`,
-          translateZ: 32,
-        }}
-        animate={{ y: [0, -5, 0] }}
-        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-      >
-        <div className="relative w-2 h-2">
-          <div className="absolute inset-0 rounded-full" style={{ background: '#22c55e' }} />
-          <motion.div
-            className="absolute inset-0 rounded-full"
-            style={{ background: '#22c55e' }}
-            animate={{ scale: [1, 2.8, 1], opacity: [0.7, 0, 0.7] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-        </div>
-        <div>
-          <p className="text-[11px] font-black" style={{ color: DARK }}>500+ Institutions Live</p>
-          <p className="text-[9px]" style={{ color: MUTED }}>Updated in real-time</p>
-        </div>
-      </motion.div>
-
-      {/* Rating chip */}
-      <motion.div
-        className="absolute -top-3 -left-2 flex items-center gap-2 px-4 py-2.5 rounded-xl"
-        style={{ background: WHITE, border: `1px solid ${BORDER}`, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-      >
-        <span className="text-[11px] font-black" style={{ color: '#f59e0b' }}>★ 4.98</span>
-        <span className="text-[9px]" style={{ color: MUTED }}>Avg. Rating</span>
-      </motion.div>
-    </motion.div>
+    </div>
   )
 }
 
 // MAIN SECTION─
 export function Features() {
-  const sectionRef = useRef(null)
-  const headingRef = useRef(null)
-  const [active, setActive] = useState(null)
-  const close = useCallback(() => setActive(null), [])
+  const wrapRef = useRef(null)   // scroll wrapper (GSAP pin trigger)
+  const pinRef = useRef(null)   // sticky viewport
+  const hdrRef = useRef(null)   // intro header
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
 
-  // Framer handles bg parallax ONLY — never touches GSAP-owned elements
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
-  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '18%'])
+  const modules = (featuresNotice ?? []).slice(0, 4)
 
-  // GSAP handles entrance animations ONLY (text + rows)
+  // Framer parallax for bg ONLY — never on GSAP targets
+  const { scrollYProgress } = useScroll({ target: wrapRef, offset: ['start end', 'end start'] })
+  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '20%'])
+
   useEffect(() => {
+    const chk = () => setIsMobile(window.innerWidth < 768)
+    chk()
+    window.addEventListener('resize', chk)
+    return () => window.removeEventListener('resize', chk)
+  }, [])
+
+  //  GSAP: heading reveal in intro section
+  useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const split = new SplitText('.feat-heading', { type: 'chars,lines' })
-      gsap.set(split.chars, { opacity: 0, y: 40, rotateX: -70, transformOrigin: '0 50% -24px' })
-      gsap.to(split.chars, {
+      const sp = new SplitText('.feat-head', { type: 'chars' })
+      gsap.set(sp.chars, { opacity: 0, y: 34, rotateX: -55, transformOrigin: '0 50% -18px' })
+      gsap.to(sp.chars, {
         opacity: 1, y: 0, rotateX: 0,
-        stagger: 0.016, duration: 0.8, ease: 'expo.out',
-        scrollTrigger: { trigger: headingRef.current, start: 'top 82%', toggleActions: 'play none none none' },
+        stagger: 0.013, duration: 0.72, ease: 'expo.out',
+        scrollTrigger: { trigger: hdrRef.current, start: 'top 83%', toggleActions: 'play none none none' },
       })
-
       gsap.from('.feat-eyebrow', {
-        opacity: 0, y: 18, duration: 0.65, ease: 'expo.out',
-        scrollTrigger: { trigger: headingRef.current, start: 'top 85%', toggleActions: 'play none none none' },
+        opacity: 0, y: 14, duration: 0.6, ease: 'expo.out',
+        scrollTrigger: { trigger: hdrRef.current, start: 'top 85%', toggleActions: 'play none none none' },
       })
-
-      gsap.from('.feat-sub', {
-        opacity: 0, y: 22, duration: 0.75, ease: 'expo.out', delay: 0.12,
-        scrollTrigger: { trigger: headingRef.current, start: 'top 82%', toggleActions: 'play none none none' },
-      })
-
-      gsap.from('.feat-row', {
-        opacity: 0, x: -28, stagger: 0.065, duration: 0.75, ease: 'expo.out',
-        scrollTrigger: { trigger: '.feat-list', start: 'top 80%', toggleActions: 'play none none none' },
-      })
-
-      gsap.from('.feat-img-block', {
-        opacity: 0, y: 44, scale: 0.96, duration: 1.0, ease: 'expo.out',
-        scrollTrigger: { trigger: '.feat-img-block', start: 'top 85%', toggleActions: 'play none none none' },
-      })
-
-      gsap.from('.feat-stat-card', {
-        opacity: 0, y: 20, stagger: 0.07, duration: 0.65, ease: 'expo.out',
-        scrollTrigger: { trigger: '.feat-stats', start: 'top 88%', toggleActions: 'play none none none' },
-      })
-    }, sectionRef)
-
+    }, hdrRef)
     return () => ctx.revert()
   }, [])
+
+  //  GSAP: pinned horizontal storytelling (desktop only)
+  useLayoutEffect(() => {
+    if (isMobile || modules.length === 0) return
+
+    const SCROLL_PER_MODULE = window.innerHeight * 3.0  // Slowed down even more for better UX
+    const totalScroll = SCROLL_PER_MODULE * modules.length
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: wrapRef.current,
+          start: 'top top',
+          end: `+=${totalScroll}`,
+          scrub: 1.4,
+          pin: pinRef.current,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onUpdate(self) {
+            const idx = Math.min(Math.floor(self.progress * modules.length), modules.length - 1)
+            setActiveIdx(idx)
+          },
+        },
+      })
+
+      const seg = 1 / modules.length   // fraction of total timeline per module
+
+      modules.forEach((feat, i) => {
+        const items = feat.list ?? []
+        const mp = `.mp-${i}`
+        const title = `.mp-title-${i}`
+        const emoji = `.mp-emoji-${i}`
+        const rule = `.mp-rule-${i}`
+        const badge = `.mp-badge-${i}`
+        const feats = items.map((_, j) => `.mf-${i}-${j}`)
+
+        const start = i * seg
+        const hold = seg * 0.52   // how long it stays visible before exit
+        const exit = seg * 0.12   // fade-out duration
+
+        //  Enter: fade panel in
+        tl.to(mp, { opacity: 1, pointerEvents: 'auto', duration: seg * 0.08, ease: 'power2.out' }, start)
+
+        //  Emoji pop
+        tl.fromTo(emoji,
+          { scale: 0.6, opacity: 0 },
+          { scale: 1, opacity: 1, duration: seg * 0.10, ease: 'back.out(1.5)' },
+          start + seg * 0.04
+        )
+
+        //  Title slide up (GSAP, not SplitText here to avoid conflicts with pinned context)
+        tl.fromTo(title,
+          { y: 28, opacity: 0 },
+          { y: 0, opacity: 1, duration: seg * 0.14, ease: 'expo.out' },
+          start + seg * 0.06
+        )
+
+        //  Accent rule draw
+        tl.to(rule, { opacity: 1, duration: seg * 0.10, ease: 'power2.out' }, start + seg * 0.12)
+
+        //  Badge pop
+        tl.fromTo(badge,
+          { scale: 0.8, opacity: 0 },
+          { scale: 1, opacity: 1, duration: seg * 0.10, ease: 'back.out(1.6)' },
+          start + seg * 0.14
+        )
+
+        //  Feature items: reduced stagger for longer 'hold' time
+        if (feats.length > 0) {
+          tl.to(feats, {
+            opacity: 1,
+            x: (i, el) => {
+              const m = el.className.match(/mf-\d+-(\d+)/);
+              const idx = m ? parseInt(m[1]) : 0;
+              return [0, 8, -10, 12, -7, 14, -9, 6, -11, 8, -5, 10, -13, 7, -8, 4, 9, -7, 12, -4][idx % 20];
+            },
+            y: (i, el) => {
+              const m = el.className.match(/mf-\d+-(\d+)/);
+              const idx = m ? parseInt(m[1]) : 0;
+              return [0, 3, -4, 2, -5, 4, -3, 5, -2, 4, -3, 2, -6, 3, -4, 1, -5, 3, -2, 1][idx % 20];
+            },
+            stagger: seg * 0.015,
+            duration: seg * 0.15,
+            ease: 'expo.out',
+          }, start + seg * 0.18)
+        }
+
+        //  Hold: implicit hold until exit starts
+
+        //  Exit
+        if (i < modules.length - 1) {
+          tl.to(mp, {
+            opacity: 0,
+            pointerEvents: 'none',
+            duration: exit,
+            ease: 'power2.in',
+          }, start + seg - exit)
+        }
+      })
+    }, wrapRef)
+
+    return () => ctx.revert()
+  }, [isMobile, modules.length])
+
+  const activeTheme = THEMES[activeIdx % THEMES.length]
 
   return (
     <>
       <MagneticDot />
 
+      {/*  INTRO SECTION (scrolls normally above the pinned scene)  */}
       <section
-        id="features"
-        ref={sectionRef}
+        style={{ background: BG, fontFamily: "'Outfit',sans-serif" }}
         className="relative overflow-hidden"
-        style={{ background: BG, fontFamily: "'Outfit', sans-serif" }}
       >
-        {/* Ambient bg — Framer only */}
         <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 55% 45% at 75% 35%, ${BLUE}07 0%, transparent 70%)` }} />
-          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 40% 40% at 12% 75%, ${RED}05 0%, transparent 70%)` }} />
+          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 55% 45% at 75% 30%, ${BLUE}06 0%, transparent 70%)` }} />
+          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 40% 40% at 10% 80%, ${RED}04 0%, transparent 70%)` }} />
           <div
-            className="absolute inset-0 opacity-[0.35]"
-            style={{
-              backgroundImage: `radial-gradient(circle, ${BLUE}18 1px, transparent 1px)`,
-              backgroundSize: '44px 44px',
-            }}
+            className="absolute inset-0 opacity-[0.28]"
+            style={{ backgroundImage: `radial-gradient(circle, ${BLUE}16 1px, transparent 1px)`, backgroundSize: '44px 44px' }}
           />
         </motion.div>
 
-        <div className="relative z-10 max-w-[1360px] mx-auto px-6 sm:px-12 lg:px-20 py-28 lg:py-40">
+        <div ref={hdrRef} className="relative z-10 max-w-[1360px] mx-auto px-6 sm:px-14 lg:px-20 pt-28 lg:pt-36 pb-14">
 
-          {/* Header */}
-          <div ref={headingRef} className="mb-16 lg:mb-24">
-            <div
-              className="feat-eyebrow inline-flex items-center gap-2.5 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.22em] mb-7"
-              style={{ background: `${BLUE}0C`, color: BLUE, border: `1px solid ${BLUE}1E` }}
-            >
-              <motion.span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: BLUE }}
-                animate={{ scale: [1, 1.7, 1], opacity: [1, 0.3, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-              />
-              Platform Features
-            </div>
-
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
-              <h2
-                className="feat-heading text-[2.8rem] lg:text-[4.2rem] xl:text-[4.8rem] font-black leading-[1.04] tracking-tight"
-                style={{ color: DARK, fontFamily: "'Outfit', sans-serif", maxWidth: 680 }}
-              >
-                Simplifying school{' '}
-                <span className="italic relative inline-block" style={{ color: BLUE }}>
-                  management
-                  <AnimUnderline delay={0.75} />
-                </span>
-                {' '}software.
-              </h2>
-              <p
-                className="feat-sub text-sm leading-[1.9] lg:text-right shrink-0"
-                style={{ color: MUTED, maxWidth: 280 }}
-              >
-                iSchool brings students, teachers, and communication together — a calm, modern experience your school relies on.
-              </p>
-            </div>
-
-            {/* Divider */}
-            <motion.div
-              className="mt-10 h-px"
-              style={{ background: `linear-gradient(90deg, ${BLUE}35, ${RED}22, transparent)`, transformOrigin: 'left' }}
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          {/* Eyebrow */}
+          <div
+            className="feat-eyebrow inline-flex items-center gap-2.5 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.22em] mb-7"
+            style={{ background: `${BLUE}0C`, color: BLUE, border: `1px solid ${BLUE}1E` }}
+          >
+            <motion.span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: BLUE }}
+              animate={{ scale: [1, 1.7, 1], opacity: [1, 0.3, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
             />
+            Platform Features
           </div>
 
-          {/* Two-column */}
-          <div className="grid lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_460px] gap-14 lg:gap-20 items-start">
+          {/* Heading */}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+            <h2
+              className="feat-head text-3xl lg:text-5xl font-black leading-[1.03] tracking-tight"
+              style={{ color: DARK, fontFamily: "'Outfit',sans-serif", maxWidth: 700 }}
+            >
+              Simplifying school{' '}
+              <span className="italic relative inline-block" style={{ color: BLUE }}>
+                management
+                <Underline delay={0.75} />
+              </span>
+              {' '}software.
+            </h2>
+            <p className="text-sm leading-[1.9] lg:text-right shrink-0" style={{ color: MUTED, maxWidth: 270 }}>
+              Scroll through each module to explore its full capability set — one by one.
+            </p>
+          </div>
 
-            {/* Left: rows */}
-            <div className="feat-list">
-              <div
-                className="flex items-center justify-between mb-1 pb-3"
-                style={{ borderBottom: `1px solid rgba(0,0,0,0.07)` }}
-              >
-                <span className="text-[9px] font-black uppercase tracking-[0.28em]" style={{ color: 'rgba(0,0,0,0.28)' }}>
-                  Feature Area
-                </span>
-                <span className="text-[9px] font-black uppercase tracking-[0.28em]" style={{ color: 'rgba(0,0,0,0.28)' }}>
-                  {featuresNotice.length} Modules
-                </span>
-              </div>
+          {/* Gradient rule */}
+          <motion.div
+            className="h-px mb-8"
+            style={{ background: `linear-gradient(90deg, ${BLUE}35, ${RED}22, transparent)`, transformOrigin: 'left' }}
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          />
 
-              {featuresNotice.map((feat, i) => (
-                <FeatureRow
-                  key={feat.title}
-                  feat={feat}
-                  index={i}
-                  onClick={setActive}
-                  isActive={active?.title === feat.title}
-                />
-              ))}
-
-              <motion.p
-                className="mt-6 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2"
-                style={{ color: 'rgba(0,0,0,0.24)' }}
-                animate={{ opacity: [0.5, 0.9, 0.5] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                </svg>
-                Click any row to explore
-              </motion.p>
-            </div>
-
-            {/* Right: image + stats */}
-            <div className="feat-img-block lg:sticky lg:top-28">
-              <ImageShowcase />
-
-              <div className="feat-stats mt-8 grid grid-cols-3 gap-3">
-                {[
-                  { val: '99.9%', label: 'Uptime SLA' },
-                  { val: '50k+', label: 'Daily Users' },
-                  { val: '<0.5s', label: 'Load Time' },
-                ].map((s) => (
-                  <motion.div
-                    key={s.label}
-                    className="feat-stat-card rounded-2xl p-4 text-center"
+          {/* Module nav pills */}
+          {!isMobile && (
+            <div className="flex items-center gap-3 flex-wrap">
+              {modules.map((feat, i) => {
+                const t = THEMES[i % THEMES.length]
+                const on = i === activeIdx
+                return (
+                  <div
+                    key={feat.title}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.16em]"
                     style={{
-                      background: WHITE,
-                      border: `1px solid ${BORDER}`,
-                      boxShadow: '0 2px 12px rgba(0,82,128,0.05)',
-                    }}
-                    whileHover={{
-                      background: `${BLUE}06`,
-                      borderColor: `${BLUE}20`,
-                      y: -4,
-                      boxShadow: `0 8px 28px ${BLUE}10`,
-                      transition: { duration: 0.28 },
+                      background: on ? `${t.accent}12` : 'rgba(0,0,0,0.04)',
+                      color: on ? t.accent : 'rgba(0,0,0,0.32)',
+                      border: `1px solid ${on ? `${t.accent}28` : 'rgba(0,0,0,0.07)'}`,
+                      transition: 'all 0.45s ease',
                     }}
                   >
-                    <p className="text-lg font-black" style={{ color: BLUE, fontFamily: "'Outfit', sans-serif" }}>
-                      {s.val}
-                    </p>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.15em] mt-1" style={{ color: MUTED }}>
-                      {s.label}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
+                    {on && <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: t.accent }} />}
+                    {t.num}. {feat.title}
+                  </div>
+                )
+              })}
+              <motion.span
+                className="text-[10px] font-bold uppercase tracking-[0.2em] ml-1"
+                style={{ color: 'rgba(0,0,0,0.2)' }}
+                animate={{ x: [0, 5, 0] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                ↓ Scroll
+              </motion.span>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* Drawer — outside section */}
-      <AnimatePresence>
-        {active && <FeatureDrawer feature={active} onClose={close} />}
-      </AnimatePresence>
+      {/* DESKTOP: PINNED SEQUENTIAL SCROLL */}
+      <div className={isMobile ? 'hidden' : 'block'}>
+        <div ref={wrapRef} style={{ fontFamily: "'Outfit',sans-serif" }}>
+          <div
+            ref={pinRef}
+            className="relative w-full overflow-hidden"
+            style={{ height: '100vh', background: BG }}
+          >
+            {/* Reactive ambient glow */}
+            <div
+              className="absolute inset-0 pointer-events-none transition-all duration-700"
+              style={{ background: `radial-gradient(ellipse 65% 65% at 82% 50%, ${activeTheme.light} 0%, transparent 65%)` }}
+            />
+            <div
+              className="absolute inset-0 pointer-events-none opacity-[0.22]"
+              style={{ backgroundImage: `radial-gradient(circle, ${BLUE}14 1px, transparent 1px)`, backgroundSize: '44px 44px' }}
+            />
+
+            {/* Left progress sidebar */}
+            {/* <div className="absolute left-7 top-4/5 -translate-y-1/2 z-30 hidden xl:flex flex-col gap-4">
+              {modules.map((feat, i) => {
+                const t  = THEMES[i % THEMES.length]
+                const on = i === activeIdx
+                return (
+                  <div key={i} className="flex items-center gap-3 transition-all duration-500" style={{ opacity: on ? 1 : 0.25 }}>
+                    <div
+                      className="rounded-full transition-all duration-400"
+                      style={{ width: on ? 10 : 6, height: on ? 10 : 6, background: on ? t.accent : 'rgba(0,0,0,0.18)' }}
+                    />
+                    {on && (
+                      <motion.span
+                        className="text-[9px] font-black uppercase tracking-[0.22em] whitespace-nowrap"
+                        style={{ color: t.accent }}
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {t.label}
+                      </motion.span>
+                    )}
+                  </div>
+                )
+              })}
+            </div> */}
+
+            {/* Bottom progress strips */}
+            <div className="absolute bottom-0 left-0 right-0 z-30 flex" style={{ height: 3 }}>
+              {modules.map((_, i) => {
+                const t = THEMES[i % THEMES.length]
+                const on = i === activeIdx
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 transition-all duration-500"
+                    style={{ background: on ? t.accent : `${t.accent}25` }}
+                  />
+                )
+              })}
+            </div>
+
+            {/* Module index counter — bottom right */}
+            <div className="absolute bottom-8 right-10 z-30 hidden lg:block">
+              <span
+                className="text-[4rem] font-black leading-none"
+                style={{
+                  color: `${activeTheme.accent}14`,
+                  fontFamily: "'Outfit',sans-serif",
+                  transition: 'color 0.5s ease',
+                }}
+              >
+                {activeTheme.num}
+              </span>
+            </div>
+
+            {/* Scroll cue — fades when past first module */}
+            <motion.div
+              className="absolute bottom-9 right-10 z-30 hidden lg:flex flex-col items-end gap-1.5"
+              animate={{ opacity: activeIdx === 0 ? 1 : 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="text-[9px] font-black uppercase tracking-[0.26em]" style={{ color: 'rgba(0,0,0,0.22)' }}>
+                Scroll to explore
+              </span>
+              <motion.svg
+                width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="rgba(0,0,0,0.22)" strokeWidth="2" strokeLinecap="round"
+                animate={{ y: [0, 6, 0] }}
+                transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+              >
+                <path d="M12 5v14M5 12l7 7 7-7" />
+              </motion.svg>
+            </motion.div>
+
+            {/*  Module panels stacked (GSAP drives opacity + inner transforms) */}
+            <div className="relative w-full h-full">
+              {modules.map((feat, i) => (
+                <ModulePanel
+                  key={feat.title}
+                  feat={feat}
+                  index={i}
+                  theme={THEMES[i % THEMES.length]}
+                  total={modules.length}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MOBILE: STACKED CARDS */}
+      <div className={isMobile ? 'block' : 'hidden'}>
+        <section
+          className="relative py-16 px-5 overflow-hidden"
+          style={{ background: BG, fontFamily: "'Outfit',sans-serif" }}
+        >
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.28]"
+            style={{ backgroundImage: `radial-gradient(circle, ${BLUE}16 1px, transparent 1px)`, backgroundSize: '36px 36px' }}
+          />
+
+          {/* Mobile heading */}
+          <div className="relative z-10 text-center mb-12">
+            <div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-5"
+              style={{ background: `${BLUE}0C`, color: BLUE, border: `1px solid ${BLUE}1E` }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: BLUE }} />
+              Platform Features
+            </div>
+            <h2 className="text-[2.4rem] font-black leading-[1.06] tracking-tight mb-3" style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}>
+              Built to{' '}
+              <span className="italic relative inline-block" style={{ color: BLUE }}>
+                simplify
+                <Underline delay={0.3} />
+              </span>
+            </h2>
+            <p className="text-sm leading-relaxed" style={{ color: MUTED }}>
+              Explore each module and its capabilities below.
+            </p>
+          </div>
+
+          {/* Mobile module cards */}
+          <div className="relative z-10 flex flex-col gap-8">
+            {modules.map((feat, i) => {
+              const t = THEMES[i % THEMES.length]
+              return (
+                <motion.div
+                  key={feat.title}
+                  className="rounded-3xl overflow-hidden"
+                  style={{ background: WHITE, border: `1px solid ${BORDER}`, boxShadow: `0 4px 24px ${t.accent}0A` }}
+                  initial={{ opacity: 0, y: 48 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-30px' }}
+                  transition={{ delay: i * 0.08, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {/* Module header */}
+                  <div
+                    className="p-6 pb-5"
+                    style={{ background: `linear-gradient(135deg, ${t.accent}09 0%, transparent 100%)`, borderBottom: `1px solid ${BORDER}` }}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div
+                          className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] mb-3"
+                          style={{ background: `${t.accent}10`, color: t.accent, border: `1px solid ${t.accent}20` }}
+                        >
+                          <span className="w-1 h-1 rounded-full" style={{ background: t.accent }} />
+                          {t.label} · {t.num}
+                        </div>
+                        <h3 className="text-xl font-black leading-snug" style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}>{feat.title}</h3>
+                      </div>
+                      <div className="text-4xl">{t.emoji}</div>
+                    </div>
+                    <div
+                      className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-[10px] font-bold"
+                      style={{ background: `${t.accent}09`, color: t.accent, border: `1px solid ${t.accent}18` }}
+                    >
+                      {(feat.list ?? []).length} capabilities
+                    </div>
+                  </div>
+
+                  {/* Feature items */}
+                  <div className="p-3.5 flex flex-col gap-2">
+                    {(feat.list ?? []).map((item, j) => (
+                      <motion.div
+                        key={j}
+                        className="flex items-start gap-2 p-1.5 rounded-xl"
+                        style={{ background: BG, border: '1px solid rgba(0,0,0,0.05)' }}
+                        initial={{ opacity: 0, x: 14 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: '-10px' }}
+                        transition={{ delay: j * 0.04, duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+                        whileHover={{ background: `${t.accent}07`, x: 3, transition: { duration: 0.2 } }}
+                      >
+                        <div
+                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                          style={{ background: `${t.accent}14`, border: `1px solid ${t.accent}28` }}
+                        >
+                          {item?.icon && (
+                            <item.icon
+                              size={16}
+                              strokeWidth={2.5}
+                              style={{ color: t.accent }}
+                            />
+                          )}
+                        </div>
+                        <span className="text-[13px] leading-tight font-bold pt-1.5" style={{ color: DARK }}>
+                          {typeof item === 'string' ? item : item?.text}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        </section>
+      </div>
     </>
   )
 }

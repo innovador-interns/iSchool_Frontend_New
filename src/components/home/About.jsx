@@ -1,207 +1,214 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useAnimationFrame } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import { Zap, ShieldCheck, BarChart3 } from 'lucide-react'
+import aboutImg from '../../assets/about-img.png'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
-// ─── CONSTANTS ───────────────────────────────────────────────────────────────
-const BRAND = '#005280'
-const ACCENT = '#C90606'
-
+//─ DATA─
 const STATS = [
-  { value: '500+', label: 'Institutions', sub: 'Worldwide partners' },
-  { value: '98%', label: 'Satisfaction', sub: 'Client retention rate' },
-  { value: '50k+', label: 'Active Users', sub: 'Daily learners' },
-  { value: '10+', label: 'Years', sub: 'Of excellence' },
+  { value: 500, suffix: '+', label: 'Institutions' },
+  { value: 98,  suffix: '%', label: 'Satisfaction' },
+  { value: 50,  suffix: 'k+',label: 'Active Users' },
+  { value: 10,  suffix: '+', label: 'Years'        },
 ]
 
-const FEATURES = [
-  { icon: <Zap size={20} strokeWidth={2.5} />, text: 'Real-time broadcast across your entire institution' },
-  { icon: <ShieldCheck size={20} strokeWidth={2.5} />, text: 'Enterprise-grade security & compliance built-in' },
-  { icon: <BarChart3 size={20} strokeWidth={2.5} />, text: 'Deep analytics for data-driven decisions' },
+const PILLARS = [
+  { Icon: Zap,         text: 'Real-time broadcast across your institution'  },
+  { Icon: ShieldCheck, text: 'Enterprise-grade security & compliance'       },
+  { Icon: BarChart3,   text: 'Deep analytics for data-driven decisions'     },
 ]
 
-// ─── 3D FLOATING CARD COMPONENT ──────────────────────────────────────────────
-function Card3D({ children, className = '', intensity = 15 }) {
-  const cardRef = useRef(null)
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [intensity, -intensity]), {
-    stiffness: 200, damping: 30
-  })
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-intensity, intensity]), {
-    stiffness: 200, damping: 30
-  })
-  const glare = useSpring(useTransform(mouseX, [-0.5, 0.5], [0, 1]), {
-    stiffness: 200, damping: 30
-  })
-
-  const handleMouse = (e) => {
-    const rect = cardRef.current.getBoundingClientRect()
-    mouseX.set((e.clientX - rect.left) / rect.width - 0.5)
-    mouseY.set((e.clientY - rect.top) / rect.height - 0.5)
-  }
-
+//─ COUNTER─
+function Counter({ value, suffix, label, run }) {
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    if (!run) return
+    let raf, t0
+    const tick = (ts) => {
+      if (!t0) t0 = ts
+      const p = Math.min((ts - t0) / 1500, 1)
+      const e = 1 - Math.pow(1 - p, 3)
+      setN(Math.floor(e * value))
+      if (p < 1) raf = requestAnimationFrame(tick)
+      else setN(value)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [run, value])
   return (
-    <motion.div
-      ref={cardRef}
-      onMouseMove={handleMouse}
-      onMouseLeave={() => { mouseX.set(0); mouseY.set(0) }}
-      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000 }}
-      className={className}
-    >
-      {children}
-      <motion.div
-        className="absolute inset-0 rounded-4xl pointer-events-none"
-        style={{
-          background: useTransform(
-            glare,
-            [0, 1],
-            ['radial-gradient(circle at 0% 50%, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 100%)',
-             'radial-gradient(circle at 100% 50%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%)']
-          )
-        }}
-      />
-    </motion.div>
-  )
-}
-
-// ─── ORBITING RING COMPONENT ──────────────────────────────────────────────────
-function OrbitRing({ radius, duration, dotCount, color, reverse = false }) {
-  const angle = useMotionValue(0)
-
-  useAnimationFrame((t) => {
-    const dir = reverse ? -1 : 1
-    angle.set((t / (duration * 1000)) * 360 * dir)
-  })
-
-  return (
-    <div
-      className="absolute rounded-full border border-dashed"
-      style={{
-        width: radius * 2,
-        height: radius * 2,
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        borderColor: `${color}30`,
-      }}
-    >
-      {Array.from({ length: dotCount }).map((_, i) => {
-        const theta = (i / dotCount) * 2 * Math.PI
-        const x = Math.cos(theta) * radius
-        const y = Math.sin(theta) * radius
-        return (
-          <motion.div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: 6,
-              height: 6,
-              background: color,
-              top: '50%',
-              left: '50%',
-              x: x - 3,
-              y: y - 3,
-              rotate: angle,
-              opacity: 0.6,
-            }}
-          />
-        )
-      })}
+    <div className="flex flex-col gap-1.5">
+      <span className="text-4xl font-black leading-none text-[#005280] tabular-nums">
+        {n}{suffix}
+      </span>
+      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">
+        {label}
+      </span>
     </div>
   )
 }
 
-// ─── ANIMATED COUNTER ────────────────────────────────────────────────────────
-function AnimatedCounter({ value, inView }) {
-  const numericValue = parseInt(value.replace(/[^0-9]/g, ''))
-  const suffix = value.replace(/[0-9]/g, '')
-  const [display, setDisplay] = useState(0)
+//─ LAPTOP MOCKUP
+function LaptopShowcase({ imgRef }) {
+  // Framer: subtle y parallax on the whole laptop — GSAP never touches this
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
+  const y = useTransform(scrollYProgress, [0, 1], ['6%', '-6%'])
 
-  useEffect(() => {
-    if (!inView) return
-    let start = 0
-    const duration = 1800
-    const step = (timestamp) => {
-      if (!start) start = timestamp
-      const progress = Math.min((timestamp - start) / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 4)
-      setDisplay(Math.floor(eased * numericValue))
-      if (progress < 1) requestAnimationFrame(step)
-    }
-    requestAnimationFrame(step)
-  }, [inView, numericValue])
+  return (
+    <motion.div ref={ref} style={{ y }} className="relative will-change-transform">
 
-  return <span>{display}{suffix}</span>
+      {/* Glow behind laptop */}
+      <div
+        className="absolute -inset-12 rounded-full blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse, rgba(0,82,128,0.12) 0%, transparent 70%)' }}
+      />
+
+      {/* Laptop shell */}
+      <div className="relative mx-auto" style={{ maxWidth: 780 }}>
+
+        {/* Screen lid */}
+        <div className="relative rounded-t-2xl bg-white/30 overflow-hidden border border-neutral-200 shadow-[0_2px_0_rgba(0,0,0,0.08)]">
+
+          {/* Browser chrome bar */}
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/8 bg-white/30">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+              <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+              <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+            </div>
+            <div className="flex-1 mx-3 h-5 rounded-md flex items-center px-3" style={{ background: 'rgba(255,255,255,0.07)' }}>
+              <span className="text-[10px] font-medium text-black">app.ischool.io/dashboard</span>
+            </div>
+          </div>
+
+          {/* Dashboard screenshot */}
+          <div ref={imgRef} className="relative overflow-hidden">
+            <img
+              src={aboutImg}
+              alt="iSchool Dashboard"
+              className="w-[600px] max-h-[460px] block object-cover mx-auto"
+              style={{ objectPosition: 'top' }}
+            />
+            {/* Bottom fade */}
+            <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+              style={{ background: 'linear-gradient(to top, #fafafa, transparent)' }} />
+          </div>
+        </div>
+
+        {/* Hinge */}
+        <div className="h-[6px] rounded-none mx-2 relative z-10"
+          style={{ background: 'linear-gradient(to bottom, #fafafa, #fafafa)', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }} />
+
+        {/* Base / keyboard area */}
+        <div className="h-5 rounded-b-2xl mx-0 relative"
+          style={{ background: 'linear-gradient(to bottom, #fafafa, #fafafa)', boxShadow: '0 12px 40px rgba(0,0,0,0.25)' }}>
+          {/* Trackpad hint */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-20 h-2 rounded-full bg-[#005280]/80" />
+        </div>
+      </div>
+
+      {/* Floating stat chips */}
+      <motion.div
+        className="absolute -left-4 top-12 lg:-left-14 flex items-center gap-2.5 bg-white rounded-2xl px-4 py-3 shadow-lg border border-neutral-100/80"
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className="w-8 h-8 rounded-xl bg-[#005280]/10 flex items-center justify-center shrink-0">
+          <BarChart3 size={15} className="text-[#005280]" />
+        </div>
+        <div>
+          <p className="text-xs font-black text-neutral-800">98% Satisfaction</p>
+          <p className="text-[9px] text-neutral-400 font-medium">Client retention</p>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="absolute -right-4 bottom-16 lg:-right-12 flex items-center gap-2.5 bg-white rounded-2xl px-4 py-3 shadow-lg border border-neutral-100/80"
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+      >
+        <div className="relative w-2.5 h-2.5 shrink-0">
+          <div className="absolute inset-0 rounded-full bg-emerald-500" />
+          <div className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-70" />
+        </div>
+        <div>
+          <p className="text-xs font-black text-neutral-800">500+ Schools Live</p>
+          <p className="text-[9px] text-neutral-400 font-medium">Updated in real-time</p>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
 }
 
-// ─── MAIN ABOUT SECTION ───────────────────────────────────────────────────────
+//─ MAIN SECTION─
 export function About() {
-  const sectionRef = useRef(null)
-  const headingRef = useRef(null)
-  const imageRef = useRef(null)
-  const [statsInView, setStatsInView] = useState(false)
+  const sectionRef  = useRef(null)
+  const topRef      = useRef(null)
+  const imgRef      = useRef(null)
+  const mockupRef   = useRef(null)
+  const [countersOn, setCountersOn] = useState(false)
 
-  // ── Framer Motion scroll for parallax (NOT used for GSAP-handled elements)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  })
-
-  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '20%'])
-  const imgParallaxY = useTransform(scrollYProgress, [0, 1], ['0%', '-12%'])
-  const imgScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.08, 1, 0.96])
-  const orbitOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
-
-  // ── GSAP handles text reveals ONLY (no conflict with Framer)
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Heading character-by-character
-      if (headingRef.current) {
-        const split = new SplitText(headingRef.current, { type: 'chars,words' })
-        gsap.from(split.chars, {
-          opacity: 0,
-          y: 60,
-          rotateX: -90,
-          transformOrigin: '0% 50% -50px',
-          stagger: 0.022,
-          duration: 0.9,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: headingRef.current,
-            start: 'top 82%',
-            toggleActions: 'play none none none',
-          },
-        })
-      }
 
-      // Stats inview trigger for counters
-      if (document.querySelector('.gsap-stats')) {
-        ScrollTrigger.create({
-          trigger: '.gsap-stats',
-          start: 'top 80%',
-          onEnter: () => setStatsInView(true),
-        })
-      }
-
-      // Floating badge pop
-      gsap.from('.gsap-badge', {
-        opacity: 0,
-        scale: 0.6,
-        y: 30,
-        duration: 0.9,
-        ease: 'back.out(1.7)',
-        scrollTrigger: {
-          trigger: '.gsap-badge',
-          start: 'top 90%',
-          toggleActions: 'play none none none',
-        },
+      // Top eyebrow pill
+      gsap.from('.ab-eyebrow', {
+        opacity: 0, y: 14, duration: 0.6, ease: 'power3.out',
+        scrollTrigger: { trigger: topRef.current, start: 'top 82%', toggleActions: 'play none none none' },
       })
+
+      // Heading lines
+      const split = new SplitText('.ab-heading', { type: 'lines' })
+      gsap.from(split.lines, {
+        opacity: 0, y: 44, duration: 0.8, stagger: 0.1, ease: 'expo.out',
+        scrollTrigger: { trigger: topRef.current, start: 'top 80%', toggleActions: 'play none none none' },
+      })
+
+      // Subline
+      gsap.from('.ab-sub', {
+        opacity: 0, y: 20, duration: 0.7, ease: 'power3.out', delay: 0.15,
+        scrollTrigger: { trigger: topRef.current, start: 'top 79%', toggleActions: 'play none none none' },
+      })
+
+      // Laptop mockup rises in
+      gsap.from('.ab-mockup', {
+        opacity: 0, y: 80, scale: 0.94, duration: 1.2, ease: 'expo.out',
+        scrollTrigger: { trigger: '.ab-mockup', start: 'top 85%', toggleActions: 'play none none none' },
+      })
+
+      // Bottom content reveal
+      gsap.from('.ab-pillar', {
+        opacity: 0, y: 24, stagger: 0.09, duration: 0.65, ease: 'power3.out',
+        scrollTrigger: { trigger: '.ab-bottom', start: 'top 82%', toggleActions: 'play none none none' },
+      })
+
+      // Accent rule
+      gsap.from('.ab-rule', {
+        scaleX: 0, duration: 0.7, ease: 'expo.out', transformOrigin: 'left',
+        scrollTrigger: { trigger: '.ab-bottom', start: 'top 82%', toggleActions: 'play none none none' },
+      })
+
+      // Stats
+      ScrollTrigger.create({
+        trigger: '.ab-stats',
+        start: 'top 82%',
+        onEnter: () => setCountersOn(true),
+      })
+      gsap.from('.ab-stat', {
+        opacity: 0, y: 18, stagger: 0.07, duration: 0.55, ease: 'power3.out',
+        scrollTrigger: { trigger: '.ab-stats', start: 'top 82%', toggleActions: 'play none none none' },
+      })
+
+      // CTA
+      gsap.from('.ab-cta', {
+        opacity: 0, y: 16, duration: 0.6, ease: 'power3.out', delay: 0.1,
+        scrollTrigger: { trigger: '.ab-cta', start: 'top 90%', toggleActions: 'play none none none' },
+      })
+
     }, sectionRef)
 
     return () => ctx.revert()
@@ -211,368 +218,209 @@ export function About() {
     <section
       id="about"
       ref={sectionRef}
-      className="relative min-h-screen py-32 lg:py-44 overflow-hidden bg-[#F8F6F1]"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
+      className="relative bg-[#F8F6F2] overflow-hidden"
     >
-      {/* ── Ambient background */}
-      <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none z-0">
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: `radial-gradient(circle, ${BRAND} 1px, transparent 1px)`,
-            backgroundSize: '40px 40px',
-          }}
-        />
-        <div
-          className="absolute top-0 left-0 w-full h-full"
-          style={{
-            background: `radial-gradient(ellipse 80% 60% at 20% 40%, ${BRAND}0C 0%, transparent 70%)`,
-          }}
-        />
-        <div
-          className="absolute bottom-0 right-0 w-[50%] h-[50%]"
-          style={{
-            background: `radial-gradient(ellipse 70% 70% at 70% 70%, ${ACCENT}08 0%, transparent 70%)`,
-          }}
-        />
-      </motion.div>
-
-      {/* ── Vertical label */}
+      {/* Dot grid watermark */}
       <div
-        className="absolute left-6 top-1/2 -translate-y-1/2 z-10 hidden lg:flex items-center gap-3 -rotate-90 origin-center"
-        style={{ color: `${BRAND}40` }}
+        className="absolute inset-0 pointer-events-none opacity-30"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(0,82,128,0.18) 1px, transparent 1px)',
+          backgroundSize: '44px 44px',
+        }}
+      />
+
+      {/* Top ambient glow */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-96 pointer-events-none blur-3xl opacity-40"
+        style={{ background: 'radial-gradient(ellipse, rgba(0,82,128,0.12) 0%, transparent 70%)' }}
+      />
+
+      {/* TOP TEXT BLOCK */}
+      <div
+        ref={topRef}
+        className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 pt-24 lg:pt-36 pb-16 text-center"
       >
-        <div className="w-16 h-px bg-current" />
-        <span className="text-[10px] tracking-[0.3em] font-bold uppercase whitespace-nowrap">Our Story</span>
-      </div>
-
-      {/* ── Main layout */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-6 sm:px-12 lg:px-24 grid lg:grid-cols-2 gap-16 lg:gap-20 xl:gap-24 items-center">
-
-        {/* ── LEFT: Image side */}
-        <div className="relative flex justify-center lg:justify-start">
-
-          {/* 3D Orbit system */}
-          <motion.div
-            style={{ opacity: orbitOpacity }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          >
-            <OrbitRing radius={220} duration={12} dotCount={8} color={BRAND} />
-            <OrbitRing radius={160} duration={8} dotCount={5} color={ACCENT} reverse />
-            <OrbitRing radius={290} duration={20} dotCount={12} color={BRAND} reverse />
-          </motion.div>
-
-          {/* Main image card */}
-          <Card3D
-            className="relative w-full max-w-[550px] mx-auto lg:mx-0 cursor-none"
-            intensity={12}
-          >
-            <div className="relative overflow-hidden rounded-4xl border border-white/60 shadow-[0_40px_120px_-20px_rgba(0,82,128,0.22),0_0_0_1px_rgba(0,82,128,0.06)]">
-              {/* Image */}
-              <motion.div
-                ref={imageRef}
-                style={{ y: imgParallaxY, scale: imgScale }}
-                className="will-change-transform"
-              >
-                <img
-                  src="/src/assets/about-img.png"
-                  alt="iSchool Education Platform"
-                  className="w-full max-h-[480px] object-cover block object-center rounded-4xl"
-                />
-              </motion.div>
-
-              {/* Gradient overlay */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: `linear-gradient(160deg, transparent 50%, ${BRAND}22 100%)`,
-                }}
-              />
-
-              {/* Corner accent */}
-              <div
-                className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: `${ACCENT}15`, backdropFilter: 'blur(10px)', border: `1px solid ${ACCENT}30` }}
-              >
-                <div className="w-2 h-2 rounded-full animate-ping" style={{ background: ACCENT }} />
-              </div>
-            </div>
-
-            {/* Decorative frame */}
-            <div
-              className="absolute -z-10 inset-0 rounded-[2.5rem] translate-x-5 translate-y-5"
-              style={{ border: `2px dashed ${BRAND}18` }}
-            />
-          </Card3D>
-
-          {/* Floating stat badge */}
-          <motion.div
-            className="gsap-badge absolute -bottom-4 -right-4 lg:-right-10 z-20"
-            whileHover={{ y: -6, scale: 1.04 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          >
-            <Card3D intensity={20}>
-              <div
-                className="px-7 py-5 rounded-2xl relative overflow-hidden"
-                style={{
-                  background: 'white',
-                  boxShadow: `0 20px 60px -10px ${BRAND}25, 0 0 0 1px ${BRAND}10`,
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 w-full h-1 rounded-t-2xl"
-                  style={{ background: `linear-gradient(90deg, ${BRAND}, ${ACCENT})` }}
-                />
-                <p className="text-5xl font-black leading-none" style={{ color: BRAND, fontFamily: 'DM Serif Display, serif' }}>10+</p>
-                <p className="text-[9px] uppercase tracking-[0.22em] font-bold mt-1.5" style={{ color: '#999' }}>Years of Excellence</p>
-              </div>
-            </Card3D>
-          </motion.div>
-
-          {/* Secondary floating chip */}
-          <motion.div
-            className="absolute -top-5 -right-2 lg:-right-6 z-20"
-            initial={{ opacity: 0, scale: 0.8, y: -10 }}
-            whileInView={{ opacity: 1, scale: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.6, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            whileHover={{ scale: 1.08 }}
-          >
-            <div
-              className="px-4 py-2.5 rounded-full flex items-center gap-2.5"
-              style={{
-                background: 'white',
-                boxShadow: `0 8px 24px ${BRAND}18, 0 0 0 1px ${BRAND}10`,
-              }}
-            >
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
-              <span className="text-xs font-bold" style={{ color: BRAND }}>500+ Institutions Online</span>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* ── RIGHT: Content side */}
-        <div className="lg:pl-20 xl:pl-28 flex flex-col gap-8">
-
-          {/* Eyebrow tag */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div
-              className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em]"
-              style={{
-                background: `${BRAND}0C`,
-                color: BRAND,
-                border: `1px solid ${BRAND}18`,
-              }}
-            >
-              <motion.span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: BRAND }}
-                animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-              />
-              Legacy of Innovation
-            </div>
-          </motion.div>
-
-          {/* Heading — GSAP SplitText controlled, NOT Framer */}
-          <div>
-            <h2
-              ref={headingRef}
-              className="text-[2.8rem] lg:text-[3.8rem] xl:text-[4.4rem] font-black leading-[1.04] tracking-tight"
-              style={{ color: '#0F0F0F', fontFamily: 'DM Serif Display, serif' }}
-            >
-              Welcome to {' '}
-              <span className="relative inline-block" style={{ color: BRAND }}>
-                iSchool
-                <svg className="absolute -bottom-2 left-0 w-full overflow-visible" viewBox="0 0 200 10" preserveAspectRatio="none">
-                  <motion.path
-                    d="M2 7 C50 2, 100 9, 150 5 C175 3, 195 6, 198 7"
-                    fill="none"
-                    stroke={ACCENT}
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    whileInView={{ pathLength: 1, opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                  />
-                </svg>
-              </span>
-            </h2>
-          </div>
-
-          {/* Divider */}
-          <motion.div
-            initial={{ scaleX: 0, opacity: 0 }}
-            whileInView={{ scaleX: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            style={{ transformOrigin: 'left' }}
-            className="flex items-center gap-2"
-          >
-            <div className="h-[3px] w-14 rounded-full" style={{ background: ACCENT }} />
-            <div className="h-[3px] w-4 rounded-full" style={{ background: `${ACCENT}40` }} />
-            <div className="h-[3px] w-2 rounded-full" style={{ background: `${ACCENT}20` }} />
-          </motion.div>
-
-          {/* Body */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-4"
-          >
-            <p className="text-[1.05rem] leading-[1.85]" style={{ color: '#555' }}>
-              iSchool Mobile App empowers management and educators to broadcast critical updates instantly,
-              ensuring a seamless flow of information across your institution.
-            </p>
-            <p className="text-[1.05rem] leading-[1.85]" style={{ color: '#777' }}>
-              Discover a world of simplicity, efficiency, and enhanced communication — built for the schools of tomorrow.
-            </p>
-          </motion.div>
-
-          {/* Feature list — GSAP controlled */}
-          {/* <div className="gsap-features space-y-3 pt-1">
-            {FEATURES.map((f, i) => (
-              <div
-                key={i}
-                className="gsap-feature flex items-start gap-4 px-5 py-4 rounded-2xl group cursor-default"
-                style={{
-                  background: 'white',
-                  border: `1px solid ${BRAND}0C`,
-                  boxShadow: `0 2px 12px ${BRAND}06`,
-                  transition: 'box-shadow 0.3s ease, transform 0.3s ease',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.boxShadow = `0 8px 30px ${BRAND}14, 0 0 0 1px ${BRAND}15`
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.boxShadow = `0 2px 12px ${BRAND}06`
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                <div
-                  className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                  style={{ background: `${BRAND}08` }}
-                >
-                  {f.icon}
-                </div>
-                <p className="text-sm leading-relaxed font-medium pt-1.5" style={{ color: '#444' }}>
-                  {f.text}
-                </p>
-              </div>
-            ))}
-          </div> */}
-
-          {/* Stats — counters */}
-          <div className="gsap-stats grid grid-cols-2 sm:grid-cols-2 gap-4 pt-2">
-            {STATS.map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ y: -4, scale: 1.03 }}
-                className="relative overflow-hidden rounded-2xl p-5 cursor-default"
-                style={{
-                  background: i % 2 === 0 ? `${BRAND}05` : 'white',
-                  border: `1px solid ${BRAND}0F`,
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 w-full h-0.5 rounded-t-2xl"
-                  style={{ background: i === 0 ? `linear-gradient(90deg, ${BRAND}, ${BRAND}00)` : 'transparent' }}
-                />
-                <p className="text-3xl font-black leading-none" style={{ color: BRAND, fontFamily: 'DM Serif Display, serif' }}>
-                  <AnimatedCounter value={s.value} inView={statsInView} />
-                </p>
-                <p className="text-[11px] font-bold uppercase tracking-[0.15em] mt-1.5" style={{ color: '#999' }}>
-                  {s.label}
-                </p>
-                <p className="text-[10px] mt-0.5" style={{ color: '#bbb' }}>{s.sub}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          {/* <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap gap-4 pt-2"
-          >
-            <motion.a
-              href="https://www.innovadorsolutions.com/?fluent-form=7"
-              target="_blank"
-              rel="noreferrer"
-              className="relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-white font-bold text-sm overflow-hidden"
-              style={{
-                background: BRAND,
-                boxShadow: `0 14px 40px ${BRAND}35`,
-              }}
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              <motion.span
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)`,
-                }}
-                initial={{ x: '-200%' }}
-                whileHover={{ x: '200%' }}
-                transition={{ duration: 0.6, ease: 'easeInOut' }}
-              />
-              <span className="relative z-10">Learn More About Us</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 flex-shrink-0">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </motion.a>
-
-            <motion.a
-              href="#contact"
-              className="inline-flex items-center gap-2.5 px-7 py-4 rounded-2xl font-bold text-sm"
-              style={{
-                background: 'white',
-                color: BRAND,
-                border: `1.5px solid ${BRAND}20`,
-                boxShadow: `0 4px 20px ${BRAND}08`,
-              }}
-              whileHover={{ scale: 1.04, y: -2, borderColor: BRAND }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              Get a Demo
-            </motion.a>
-          </motion.div> */}
-        </div>
-      </div>
-
-      {/* ── Bottom scroll cue */}
-      <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
-        animate={{ y: [0, 8, 0] }}
-        transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
-      >
-        <div className="text-[9px] uppercase tracking-[0.28em] font-bold" style={{ color: `${BRAND}50` }}>Scroll</div>
-        <div className="w-px h-8 rounded-full overflow-hidden" style={{ background: `${BRAND}18` }}>
-          <motion.div
-            className="w-full rounded-full"
-            style={{ background: BRAND, height: '40%' }}
-            animate={{ y: ['-100%', '300%'] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+        {/* Eyebrow */}
+        <div className="ab-eyebrow inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.22em] mb-8 bg-[#005280]/8 text-[#005280] border border-[#005280]/15">
+          <motion.span
+            className="w-1.5 h-1.5 rounded-full bg-[#005280]"
+            animate={{ scale: [1, 1.6, 1], opacity: [1, 0.35, 1] }}
+            transition={{ repeat: Infinity, duration: 2.2 }}
           />
+          Legacy of Innovation
         </div>
-      </motion.div>
+
+        {/* Heading */}
+        <h2 className="ab-heading text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight text-neutral-900 max-w-4xl mx-auto mb-6">
+          Welcome to the{' '}
+          <span className="relative inline-block text-[#005280]">
+            Future of Education
+            <svg
+              className="absolute -bottom-2 left-0 w-full overflow-visible"
+              viewBox="0 0 480 8"
+              preserveAspectRatio="none"
+            >
+              <motion.path
+                d="M2 6 Q120 1 240 5 Q360 8 478 3"
+                fill="none" stroke="#C90606" strokeWidth="2.5" strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0 }}
+                whileInView={{ pathLength: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.55, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              />
+            </svg>
+          </span>
+        </h2>
+
+        {/* Sub */}
+        <p className="ab-sub text-base lg:text-lg leading-[1.85] text-neutral-500 max-w-2xl mx-auto">
+          iSchool Mobile App empowers management and educators to broadcast critical updates instantly —
+          a seamless flow of information built for the schools of tomorrow.
+        </p>
+      </div>
+
+      {/* LAPTOP MOCKUP */}
+      <div className="ab-mockup relative z-10 max-w-5xl mx-auto px-6 sm:px-10 lg:px-16">
+        <LaptopShowcase imgRef={imgRef} />
+      </div>
+
+      {/* BOTTOM CONTENT BLOCK */}
+      <div
+        className="ab-bottom relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 pt-16 pb-24 lg:pt-20 lg:pb-36"
+      >
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+
+          {/* LEFT: pillars + rule */}
+          <div className="flex flex-col items-center lg:items-start gap-8 text-center lg:text-left">
+            <div className="flex flex-col gap-5 w-full">
+              {/* Rule */}
+              <div className="ab-rule flex items-center justify-center lg:justify-start gap-2 mb-2">
+                <div className="h-[3px] w-12 rounded-full bg-[#C90606]" />
+                <div className="h-[3px] w-4 rounded-full bg-[#C90606]/35" />
+                <div className="h-[3px] w-2 rounded-full bg-[#C90606]/15" />
+              </div>
+
+              <p className="text-[0.97rem] leading-[1.85] text-neutral-500 max-w-xl mx-auto lg:mx-0">
+                Discover a world of simplicity, efficiency, and enhanced communication — iSchool
+                brings your institution into one unified, intelligent platform.
+              </p>
+            </div>
+
+            <div className="flex flex-col w-full gap-3 mt-2">
+              {PILLARS.map(({ Icon, text }, i) => (
+                <div
+                  key={i}
+                  className="ab-pillar group flex items-center gap-4 px-5 py-4 rounded-xl bg-white border border-neutral-100 hover:-translate-y-0.5 hover:shadow-lg hover:border-[#005280]/20 transition-all duration-300 text-left"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#005280]/8 flex items-center justify-center shrink-0 group-hover:bg-[#005280]/14 transition-colors duration-300">
+                    <Icon size={18} className="text-[#005280]" strokeWidth={2.2} />
+                  </div>
+                  <span className="text-sm font-semibold text-neutral-600 group-hover:text-neutral-900 transition-colors duration-300">
+                    {text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT: animated stat counters */}
+          <div className="flex flex-col gap-10 lg:pl-8">
+            <div className="flex flex-col gap-8">
+              {/* Eyebrow for stats */}
+              <div className="flex items-center justify-center lg:justify-start gap-2.5">
+                <div className="w-6 h-px bg-[#005280]/40" />
+                <span className="text-[9px] font-black uppercase tracking-[0.28em] text-neutral-400">
+                  By the numbers
+                </span>
+              </div>
+
+              {/* Stats 2×2 grid */}
+              <div className="ab-stats grid grid-cols-2 gap-x-8 gap-y-12">
+                {STATS.map((s, i) => (
+                  <div key={i} className="ab-stat flex flex-col gap-1.5 relative">
+                    {/* Left accent bar */}
+                    <div
+                      className="absolute -left-4 top-1 bottom-1 w-[2px] rounded-full bg-[#005280]/20"
+                    />
+                    <Counter value={s.value} suffix={s.suffix} label={s.label} run={countersOn} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Trust strip */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-8 border-t border-neutral-200">
+              <div className="flex -space-x-2">
+                {['#005280', '#C90606', '#1a7a4a', '#7c3aed'].map((c, i) => (
+                  <div
+                    key={i}
+                    className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-black text-white shadow-sm"
+                    style={{ background: c }}
+                  >
+                    {['A', 'B', 'C', 'D'][i]}
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-neutral-400 font-medium text-center sm:text-left">
+                Trusted by <span className="font-bold text-neutral-700">500+</span> institutions worldwide
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA buttons - Centered at bottom for better flow and alignment */}
+        <div className="ab-cta flex flex-wrap items-center justify-center gap-5 mt-20 lg:mt-24">
+          <motion.a
+            href="https://www.innovadorsolutions.com/?fluent-form=7"
+            target="_blank"
+            rel="noreferrer"
+            className="relative inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-white text-base font-bold bg-[#005280] overflow-hidden shadow-[0_12px_30px_rgba(0,82,128,0.25)] group"
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          >
+            <motion.span
+              className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -skew-x-12 pointer-events-none"
+              initial={{ x: '-150%' }}
+              whileHover={{ x: '180%' }}
+              transition={{ duration: 0.65, ease: "easeInOut" }}
+            />
+            <span className="relative z-10">Learn More About Us</span>
+            <svg
+              width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="3"
+              strokeLinecap="round" strokeLinejoin="round" 
+              className="relative z-10 transition-transform duration-300 group-hover:translate-x-1"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </motion.a>
+
+          {/* <motion.a
+            href="#contact"
+            className="inline-flex items-center gap-2 px-9 py-4 rounded-2xl text-base font-bold text-[#005280] bg-white border-2 border-[#005280]/10 hover:border-[#005280]/30 hover:bg-[#005280]/4 transition-all duration-300 shadow-sm"
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          >
+            Get a Demo
+          </motion.a> */}
+        </div>
+      </div>
+
+
+      {/* Bottom diagonal divider */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none overflow-hidden">
+        <svg
+          viewBox="0 0 1440 64"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute bottom-0 w-full"
+          preserveAspectRatio="none"
+        >
+          <path d="M0 64 L1440 0 L1440 64 Z" fill="white" />
+        </svg>
+      </div>
     </section>
   )
 }

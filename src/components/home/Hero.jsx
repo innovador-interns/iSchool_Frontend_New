@@ -1,15 +1,3 @@
-/**
- * HERO SECTION — iSchool
- * ──────────────────────
- * Awwwards-level cinematic hero using:
- *  • Project theme colors: --primary-red #C90606, --primary-blue #005280
- *  • Tailwind CSS (no inline styles)
- *  • data.js features array
- *  • Framer Motion: scroll parallax, spring physics, staggered reveals
- *  • GSAP: cursor glow, magnetic buttons
- *  • CSS: 3D perspective, morphing blob, split-text word reveal
- */
-
 import React, { useEffect, useRef, useState } from "react"
 import {
   motion,
@@ -21,16 +9,13 @@ import {
 import gsap from "gsap"
 import { features } from "./data"
 
-/* ── Spring config ── */
+/* Spring config */
 const SPRING = { stiffness: 80, damping: 20, mass: 0.8 }
 const FAST_SPRING = { stiffness: 200, damping: 30 }
 
-/* ── Easing ── */
+/* Easing */
 const EXPO = [0.16, 1, 0.3, 1]
 
-/* ────────────────────────────────────────────
-   WORD REVEAL — 3D flip-up from baseline
-──────────────────────────────────────────── */
 function WordReveal({ text, delay = 0, className = "" }) {
   return (
     <span className={`inline-block overflow-hidden ${className}`}>
@@ -50,9 +35,8 @@ function WordReveal({ text, delay = 0, className = "" }) {
   )
 }
 
-/* ────────────────────────────────────────────
-   FEATURE CARD — glassmorphic with hover 3D
-──────────────────────────────────────────── */
+/*
+   FEATURE CARD — glassmorphic with hover 3D */
 function FeatureCard({ feature, index }) {
   const [hovered, setHovered] = useState(false)
   const cardRef = useRef(null)
@@ -103,7 +87,7 @@ function FeatureCard({ feature, index }) {
       <div
         className={`
           absolute inset-0 rounded-2xl transition-opacity duration-500
-          bg-gradient-to-br from-[#C90606]/10 via-transparent to-[#005280]/5
+          bg-linear-to-br from-[#C90606]/10 via-transparent to-[#005280]/5
           ${hovered ? "opacity-100" : "opacity-0"}
         `}
       />
@@ -112,7 +96,7 @@ function FeatureCard({ feature, index }) {
       <div
         className={`
           absolute top-0 left-0 h-[3px] rounded-full
-          bg-gradient-to-r from-[#C90606] to-[#005280]
+          bg-linear-to-r from-[#C90606] to-[#005280]
           transition-all duration-700
           ${hovered ? "w-full" : "w-0"}
         `}
@@ -151,9 +135,7 @@ function FeatureCard({ feature, index }) {
   )
 }
 
-/* ────────────────────────────────────────────
-   MAGNETIC CTA BUTTON
-──────────────────────────────────────────── */
+/* MAGNETIC CTA BUTTON */
 function MagneticButton({ children, primary = false, delay = 0, onClick }) {
   const btnRef = useRef(null)
   const x = useMotionValue(0)
@@ -187,7 +169,7 @@ function MagneticButton({ children, primary = false, delay = 0, onClick }) {
         font-semibold text-sm tracking-wide overflow-hidden
         transition-shadow duration-300 cursor-pointer
         ${primary
-          ? "bg-gradient-to-r from-[#C90606] to-[#a50505] text-white border border-[#C90606]/50 shadow-[0_0_24px_rgba(201,6,6,0.3)] hover:shadow-[0_0_48px_rgba(201,6,6,0.5)]"
+          ? "bg-linear-to-r from-[#C90606] to-[#a50505] text-white border border-[#C90606]/50 shadow-[0_0_24px_rgba(201,6,6,0.3)] hover:shadow-[0_0_48px_rgba(201,6,6,0.5)]"
           : "bg-white text-[#005280] border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-[#005280]/20"
         }
       `}
@@ -195,9 +177,9 @@ function MagneticButton({ children, primary = false, delay = 0, onClick }) {
       {/* Shimmer sweep */}
       <span
         className={`
-          absolute inset-0 translate-x-[-100%] group-hover:translate-x-[200%]
+          absolute inset-0 -translate-x-full group-hover:translate-x-[200%]
           transition-transform duration-700 ease-in-out
-          bg-gradient-to-r from-transparent via-white/30 to-transparent
+          bg-linear-to-r from-transparent via-white/30 to-transparent
           pointer-events-none
         `}
       />
@@ -206,9 +188,8 @@ function MagneticButton({ children, primary = false, delay = 0, onClick }) {
   )
 }
 
-/* ────────────────────────────────────────────
-   ANIMATED COUNTER
-──────────────────────────────────────────── */
+/*
+   ANIMATED COUNTER */
 function Counter({ to, suffix = "", prefix = "" }) {
   const [count, setCount] = useState(0)
   useEffect(() => {
@@ -228,9 +209,8 @@ function Counter({ to, suffix = "", prefix = "" }) {
   )
 }
 
-/* ────────────────────────────────────────────
-   MAIN HERO
-──────────────────────────────────────────── */
+/*
+   MAIN HERO */
 export function Hero() {
   const containerRef = useRef(null)
   const glowRef = useRef(null)
@@ -289,7 +269,7 @@ export function Hero() {
       style={{ perspective: "1200px" }}
     >
 
-      {/* ── BACKGROUND LAYER (parallax slow) ── */}
+      {/* BACKGROUND LAYER (parallax slow) */}
       <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
 
         {/* Primary blue orb */}
@@ -334,7 +314,7 @@ export function Hero() {
         />
       </motion.div>
 
-      {/* ── GRAIN TEXTURE ── */}
+      {/* GRAIN TEXTURE */}
       <div
         className="absolute inset-0 pointer-events-none z-0 opacity-[0.02]"
         style={{
@@ -343,7 +323,7 @@ export function Hero() {
         }}
       />
 
-      {/* ── PERSPECTIVE GRID ── */}
+      {/* PERSPECTIVE GRID */}
       <div
         className="absolute inset-0 pointer-events-none z-0"
         style={{
@@ -356,19 +336,17 @@ export function Hero() {
         }}
       />
 
-      {/* ── GSAP CURSOR GLOW ── */}
+      {/* GSAP CURSOR GLOW */}
       <div
         ref={glowRef}
-        className="absolute w-[500px] h-[500px] rounded-full pointer-events-none z-[1]"
+        className="absolute w-[500px] h-[500px] rounded-full pointer-events-none z-1"
         style={{
           background: "radial-gradient(circle, rgba(201,6,6,0.05), transparent 70%)",
           filter: "blur(60px)",
         }}
       />
 
-      {/* ════════════════════════════════════
-          HERO CONTENT
-      ════════════════════════════════════ */}
+      {/* HERO CONTENT */}
       <div className="relative min-h-screen flex items-center justify-center pt-14 pb-20 z-10">
         <motion.div
           style={{
@@ -382,7 +360,7 @@ export function Hero() {
         >
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
-            {/* ── LEFT TEXT ── */}
+            {/* LEFT TEXT */}
             <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
 
               {/* Badge */}
@@ -469,7 +447,7 @@ export function Hero() {
                   <React.Fragment key={i}>
                     {i > 0 && <div className="w-px h-8 bg-slate-200" />}
                     <div>
-                      <div className="text-2xl font-black bg-gradient-to-r from-[#005280] to-slate-500 bg-clip-text text-transparent">
+                      <div className="text-2xl font-black bg-linear-to-r from-[#005280] to-slate-500 bg-clip-text text-transparent">
                         <Counter to={Math.round(s.val)} suffix={s.suffix} prefix={s.prefix || ""} />
                       </div>
                       <div className="text-[11px] text-slate-400 uppercase tracking-widest font-bold mt-0.5">
@@ -481,7 +459,7 @@ export function Hero() {
               </motion.div>
             </div>
 
-            {/* ── RIGHT: 3D BLOB + FLOATING CARDS ── */}
+            {/* RIGHT: 3D BLOB + FLOATING CARDS */}
             <div className="relative flex items-center justify-center h-[350px] sm:h-[450px] lg:h-[560px] transform scale-75 sm:scale-90 lg:scale-100 mt-10 lg:mt-0">
 
               {/* Floating stat card 1 */}
@@ -630,7 +608,7 @@ export function Hero() {
         </motion.div>
       </div>
 
-      {/* ── SCROLL INDICATOR ── */}
+      {/* SCROLL INDICATOR */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -668,7 +646,7 @@ export function Hero() {
           <h2 className="text-3xl lg:text-4xl font-black text-[#005280] mt-3 tracking-tight">
             Everything your institution needs
           </h2>
-          <div className="w-16 h-1 bg-gradient-to-r from-[#C90606] to-[#005280] mx-auto mt-4 rounded-full opacity-80" />
+          <div className="w-16 h-1 bg-linear-to-r from-[#C90606] to-[#005280] mx-auto mt-4 rounded-full opacity-80" />
         </motion.div>
 
         {/* Feature cards grid */}
@@ -679,7 +657,7 @@ export function Hero() {
         </div>
       </div>
 
-      {/* ── KEYFRAMES (scoped via style tag) ── */}
+      {/* KEYFRAMES (scoped via style tag) */}
       <style>{`
         @keyframes gradShift {
           0%   { background-position: 0% 50%; }
