@@ -6,13 +6,13 @@ import { lists } from './data'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// ─── BRAND TOKENS ─────────────────────────────────────────────────────────────
+//  BRAND TOKENS
 const BLUE = '#005280'
 const RED = '#C90606'
 const CREAM = '#F7F5F0'
 const DARK = '#0A0A0F'
 
-// ─── CARD ICONS (inline SVG fallback if no img) ──────────────────────────────
+//  CARD ICONS (inline SVG fallback if no img) 
 const ACCENT_COLORS = [
   { bg: `${BLUE}12`, border: `${BLUE}20`, text: BLUE, glow: `${BLUE}30` },
   { bg: `${RED}10`, border: `${RED}18`, text: RED, glow: `${RED}28` },
@@ -22,7 +22,7 @@ const ACCENT_COLORS = [
   { bg: `${BLUE}10`, border: `${BLUE}18`, text: BLUE, glow: `${BLUE}28` },
 ]
 
-// ─── FLOATING PARTICLE ────────────────────────────────────────────────────────
+//  FLOATING PARTICLE
 function Particle({ x, y, size, color, delay }) {
   return (
     <motion.div
@@ -34,7 +34,7 @@ function Particle({ x, y, size, color, delay }) {
   )
 }
 
-// ─── FEATURE CARD ────────────────────────────────────────────────────────────
+//  FEATURE CARD 
 function FeatureCard({ item, index, isActive }) {
   const accent = ACCENT_COLORS[index % ACCENT_COLORS.length]
   const num = String(index + 1).padStart(2, '0')
@@ -42,7 +42,7 @@ function FeatureCard({ item, index, isActive }) {
 
   return (
     <motion.div
-      className="relative shrink-0 w-[340px] lg:w-[380px] h-[380px] lg:h-[380px] cursor-default"
+      className="relative shrink-0 w-85 lg:w-95 h-95 lg:h-95 cursor-default"
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       animate={{ y: hovered ? -12 : 0 }}
@@ -78,7 +78,7 @@ function FeatureCard({ item, index, isActive }) {
       >
         {/* Top accent bar */}
         <motion.div
-          className="absolute top-0 left-0 h-[3px] rounded-t-[36px]"
+          className="absolute top-0 left-0 h-0.75 rounded-t-[36px]"
           animate={{ width: hovered ? '100%' : '0%' }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           style={{ background: `linear-gradient(90deg, ${RED}, ${BLUE})` }}
@@ -95,7 +95,7 @@ function FeatureCard({ item, index, isActive }) {
         <div className="flex flex-col h-full p-10">
           {/* Icon */}
           <motion.div
-            className="w-[68px] h-[68px] rounded-2xl flex items-center justify-center mb-auto shrink-0"
+            className="w-17 h-17 rounded-2xl flex items-center justify-center mb-auto shrink-0"
             animate={{
               rotate: hovered ? 8 : 0,
               scale: hovered ? 1.08 : 1,
@@ -171,7 +171,7 @@ function FeatureCard({ item, index, isActive }) {
   )
 }
 
-// ─── MAIN SECTION ─────────────────────────────────────────────────────────────
+//  MAIN SECTION ─
 export function WhyISchool() {
   const wrapperRef = useRef(null)
   const stickyRef = useRef(null)
@@ -348,7 +348,7 @@ export function WhyISchool() {
 
           {/* ── Left panel */}
           <div
-            className="absolute left-0 top-[52px] bottom-0 z-20 flex flex-col justify-between"
+            className="absolute left-0 top-13 bottom-0 z-20 flex flex-col justify-between"
             style={{
               width: 360,
               padding: '52px 44px',
@@ -406,7 +406,7 @@ export function WhyISchool() {
                     {progressPct}%
                   </motion.span>
                 </div>
-                <div className="h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.07)' }}>
+                <div className="h-0.75 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.07)' }}>
                   <div
                     ref={progressBarRef}
                     className="h-full rounded-full"
@@ -447,7 +447,7 @@ export function WhyISchool() {
 
           {/* ── Right: horizontal card track */}
           <div
-            className="absolute top-[52px] bottom-0 overflow-hidden"
+            className="absolute top-13 bottom-0 overflow-hidden"
             style={{ left: 360, right: 0 }}
           >
             {/* Edge fades */}
@@ -472,7 +472,7 @@ export function WhyISchool() {
 
               {/* End card */}
               <motion.div
-                className="shrink-0 w-[300px] h-[500px] lg:h-[540px] rounded-[36px] flex flex-col items-center justify-center gap-6 cursor-default"
+                className="shrink-0 w-75 h-125 lg:h-135 rounded-[36px] flex flex-col items-center justify-center gap-6 cursor-default"
                 style={{
                   background: `linear-gradient(135deg, ${BLUE} 0%, ${DARK} 100%)`,
                   border: `1px solid ${BLUE}30`,

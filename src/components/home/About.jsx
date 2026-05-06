@@ -90,7 +90,7 @@ function LaptopShowcase({ imgRef }) {
             <img
               src={aboutImg}
               alt="iSchool Dashboard"
-              className="w-[600px] max-h-[460px] block object-cover mx-auto"
+              className="w-150 max-h-115 block object-cover mx-auto"
               style={{ objectPosition: 'top' }}
             />
             {/* Bottom fade */}
@@ -100,7 +100,7 @@ function LaptopShowcase({ imgRef }) {
         </div>
 
         {/* Hinge */}
-        <div className="h-[6px] rounded-none mx-2 relative z-10"
+        <div className="h-1.5 rounded-none mx-2 relative z-10"
           style={{ background: 'linear-gradient(to bottom, #fafafa, #fafafa)', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }} />
 
         {/* Base / keyboard area */}
@@ -295,9 +295,9 @@ export function About() {
             <div className="flex flex-col gap-5 w-full">
               {/* Rule */}
               <div className="ab-rule flex items-center justify-center lg:justify-start gap-2 mb-2">
-                <div className="h-[3px] w-12 rounded-full bg-[#C90606]" />
-                <div className="h-[3px] w-4 rounded-full bg-[#C90606]/35" />
-                <div className="h-[3px] w-2 rounded-full bg-[#C90606]/15" />
+                <div className="h-0.75 w-12 rounded-full bg-[#C90606]" />
+                <div className="h-0.75 w-4 rounded-full bg-[#C90606]/35" />
+                <div className="h-0.75 w-2 rounded-full bg-[#C90606]/15" />
               </div>
 
               <p className="text-[0.97rem] leading-[1.85] text-neutral-500 max-w-xl mx-auto lg:mx-0">
@@ -340,7 +340,7 @@ export function About() {
                   <div key={i} className="ab-stat flex flex-col gap-1.5 relative">
                     {/* Left accent bar */}
                     <div
-                      className="absolute -left-4 top-1 bottom-1 w-[2px] rounded-full bg-[#005280]/20"
+                      className="absolute -left-4 top-1 bottom-1 w-0.5 rounded-full bg-[#005280]/20"
                     />
                     <Counter value={s.value} suffix={s.suffix} label={s.label} run={countersOn} />
                   </div>

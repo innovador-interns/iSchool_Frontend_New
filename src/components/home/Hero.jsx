@@ -8,6 +8,8 @@ import {
 } from "framer-motion"
 import gsap from "gsap"
 import { features } from "./data"
+import appStoreImg from '../../assets/app-store.svg'
+import googlePlayImg from '../../assets/google-play.svg'
 
 /* Spring config */
 const SPRING = { stiffness: 80, damping: 20, mass: 0.8 }
@@ -95,7 +97,7 @@ function FeatureCard({ feature, index }) {
       {/* Top border accent — animates on hover */}
       <div
         className={`
-          absolute top-0 left-0 h-[3px] rounded-full
+          absolute top-0 left-0 h-0.75 rounded-full
           bg-linear-to-r from-[#C90606] to-[#005280]
           transition-all duration-700
           ${hovered ? "w-full" : "w-0"}
@@ -135,56 +137,43 @@ function FeatureCard({ feature, index }) {
   )
 }
 
-/* MAGNETIC CTA BUTTON */
-function MagneticButton({ children, primary = false, delay = 0, onClick }) {
-  const btnRef = useRef(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const sx = useSpring(x, { stiffness: 150, damping: 15 })
-  const sy = useSpring(y, { stiffness: 150, damping: 15 })
+//  Download button
+
+function MagneticWrap({ children, strength = 0.3 }) {
+  const ref = useRef(null)
+  const x = useSpring(0, { stiffness: 200, damping: 20 })
+  const y = useSpring(0, { stiffness: 200, damping: 20 })
 
   const handleMove = (e) => {
-    const rect = btnRef.current.getBoundingClientRect()
-    x.set((e.clientX - rect.left - rect.width / 2) * 0.25)
-    y.set((e.clientY - rect.top - rect.height / 2) * 0.15)
+    const r = ref.current.getBoundingClientRect()
+    const cx = r.left + r.width / 2
+    const cy = r.top + r.height / 2
+    x.set((e.clientX - cx) * strength)
+    y.set((e.clientY - cy) * strength)
   }
-  const handleLeave = () => {
-    x.set(0)
-    y.set(0)
-  }
+  const reset = () => { x.set(0); y.set(0) }
 
   return (
-    <motion.a
-      ref={btnRef}
-      initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.9, delay, ease: EXPO }}
-      style={{ x: sx, y: sy }}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      whileTap={{ scale: 0.96 }}
-      onClick={onClick}
-      className={`
-        group relative flex items-center gap-2 px-8 py-4 rounded-xl
-        font-semibold text-sm tracking-wide overflow-hidden
-        transition-shadow duration-300 cursor-pointer
-        ${primary
-          ? "bg-linear-to-r from-[#C90606] to-[#a50505] text-white border border-[#C90606]/50 shadow-[0_0_24px_rgba(201,6,6,0.3)] hover:shadow-[0_0_48px_rgba(201,6,6,0.5)]"
-          : "bg-white text-[#005280] border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-[#005280]/20"
-        }
-      `}
-    >
-      {/* Shimmer sweep */}
-      <span
-        className={`
-          absolute inset-0 -translate-x-full group-hover:translate-x-[200%]
-          transition-transform duration-700 ease-in-out
-          bg-linear-to-r from-transparent via-white/30 to-transparent
-          pointer-events-none
-        `}
-      />
+    <motion.div ref={ref} style={{ x, y }} onMouseMove={handleMove} onMouseLeave={reset}>
       {children}
-    </motion.a>
+    </motion.div>
+  )
+}
+
+function DownloadButton({ href, img, alt }) {
+  return (
+    <MagneticWrap>
+      <motion.a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.04 }}
+        whileTap={{ scale: 0.96 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <img src={img} alt={alt} className="h-18 w-40 object-contain shrink-0" />
+      </motion.a>
+    </MagneticWrap>
   )
 }
 
@@ -339,7 +328,7 @@ export function Hero() {
       {/* GSAP CURSOR GLOW */}
       <div
         ref={glowRef}
-        className="absolute w-[500px] h-[500px] rounded-full pointer-events-none z-1"
+        className="absolute w-125 h-125 rounded-full pointer-events-none z-1"
         style={{
           background: "radial-gradient(circle, rgba(201,6,6,0.05), transparent 70%)",
           filter: "blur(60px)",
@@ -369,7 +358,7 @@ export function Hero() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.9, delay: 0.2, ease: EXPO }}
                 className="
-                  inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8
+                  inline-flex items-center gap-2 px-4 py-2 rounded-full mb-5
                   border border-[#005280]/20 bg-white/60 shadow-sm backdrop-blur-xl
                 "
               >
@@ -385,7 +374,7 @@ export function Hero() {
 
               {/* Headline */}
               <h1
-                className="font-black leading-none tracking-tighter mb-7"
+                className="font-black leading-none tracking-tighter mb-4"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {/* Line 1 */}
@@ -408,28 +397,23 @@ export function Hero() {
                 initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 1.1, delay: 1.1, ease: EXPO }}
-                className="text-[17px] leading-relaxed text-slate-600 max-w-md mb-10 font-light"
+                className="text-[17px] text-slate-600 max-w-md mb-5"
               >
-                iSchool unifies academics, administration, communication and finance into one{" "}
-                <span className="text-slate-800 font-semibold">intelligent platform</span> — built for the modern institution.
+                Experience the power of state-of-the-art software designed specifically for efficient School management. This advanced system offers unparalleled control, making it effortless to oversee and regulate all aspects of your School according to your unique requirements.
               </motion.p>
 
               {/* CTAs */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-12">
-                <MagneticButton primary delay={1.25}>
-                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 8h6M9 6l2 2-2 2" />
-                  </svg>
-                  Get Started Free
-                </MagneticButton>
-
-                {/* <MagneticButton delay={1.4}>
-                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="8" cy="8" r="7" />
-                    <polygon points="6.5 5 11 8 6.5 11" fill="currentColor" stroke="none" />
-                  </svg>
-                  Watch Demo
-                </MagneticButton> */}
+              <div className="flex flex-wrap gap-3 mb-5">
+                <DownloadButton
+                  href="https://apps.apple.com/pk/app/i-school/id6450982421"
+                  img={appStoreImg}
+                  alt="App Store"
+                />
+                <DownloadButton
+                  href="https://play.google.com/store/apps/details?id=com.ischool.pk&hl=en_US"
+                  img={googlePlayImg}
+                  alt="Google Play"
+                />
               </div>
 
               {/* Stats row */}
@@ -440,7 +424,7 @@ export function Hero() {
                 className="flex items-center justify-center lg:justify-start gap-4 sm:gap-8"
               >
                 {[
-                  { val: 2400, suffix: "+", label: "Institutions" },
+                  { val: 500, suffix: "+", label: "Institutions" },
                   { val: 99.9, suffix: "%", label: "Uptime SLA", prefix: "" },
                   { val: 150, suffix: "k+", label: "Students" },
                 ].map((s, i) => (
@@ -460,7 +444,7 @@ export function Hero() {
             </div>
 
             {/* RIGHT: 3D BLOB + FLOATING CARDS */}
-            <div className="relative flex items-center justify-center h-[350px] sm:h-[450px] lg:h-[560px] transform scale-75 sm:scale-90 lg:scale-100 mt-10 lg:mt-0">
+            <div className="relative flex items-center justify-center h-87.5 sm:h-112.5 lg:h-140 transform scale-75 sm:scale-90 lg:scale-100 mt-10 lg:mt-0">
 
               {/* Floating stat card 1 */}
               <motion.div

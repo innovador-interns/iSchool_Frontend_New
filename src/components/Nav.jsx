@@ -75,7 +75,6 @@ function Nav() {
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
-  // Optimized scroll effect using Framer Motion's high-perf hook
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, "change", (latest) => {
     if (latest > 20 && !scrolled) setScrolled(true);

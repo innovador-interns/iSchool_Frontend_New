@@ -158,7 +158,7 @@ function PhoneCard({ screen, layoutIdx, isActive, onClick, onHover }) {
 
         {/* Home bar */}
         <div className="flex justify-center py-2.5" style={{ background: '#0a0a0a' }}>
-          <div className="w-24 h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.22)' }} />
+          <div className="w-24 h-1.25 rounded-full" style={{ background: 'rgba(255,255,255,0.22)' }} />
         </div>
       </div>
 
@@ -282,12 +282,12 @@ export function AppScreens() {
       {/* Ambient bg */}
       <motion.div className="absolute inset-0 pointer-events-none z-0">
         <motion.div
-          className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full"
+          className="absolute top-0 left-0 w-150 h-150 rounded-full"
           style={{ y: bgY1, background: `radial-gradient(circle, ${BLUE}07 0%, transparent 70%)` }}
         />
         <motion.div
           style={{ y: bgY2 }}
-          className="absolute -bottom-20 right-0 w-[500px] h-[500px] rounded-full"
+          className="absolute -bottom-20 right-0 w-125 h-125 rounded-full"
         />
       </motion.div>
 
@@ -305,7 +305,7 @@ export function AppScreens() {
       />
 
       {/* Section HEADER */}
-      <div className="relative z-10 max-w-[1360px] mx-auto px-6 sm:px-14 lg:px-20 pt-28 lg:pt-24">
+      <div className="relative z-10 max-w-340 mx-auto px-6 sm:px-14 lg:px-20 pt-28 lg:pt-24">
         <div ref={headingRef} className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-4">
 
           <div className="flex flex-col gap-6">
@@ -326,7 +326,7 @@ export function AppScreens() {
             {/* Heading */}
             <h2
               className="app-heading text-4xl lg:text-5xl font-black leading-[1.03] tracking-tight"
-              style={{ color: DARK, fontFamily: "'Outfit',sans-serif", maxWidth: 660 }}
+              style={{ color: DARK, maxWidth: 660 }}
             >
               See iSchool in{' '}
               <span className="italic relative inline-block" style={{ color: BLUE }}>
@@ -359,7 +359,7 @@ export function AppScreens() {
       <div className={isMobile ? 'hidden' : 'block'}>
         <div
           ref={scatterRef}
-          className="relative z-10 max-w-[1360px] min-h-[640px] mx-auto px-6 sm:px-14 lg:px-20 pt-14"
+          className="relative z-10 max-w-340 min-h-160 mx-auto px-6 sm:px-14 lg:px-20 pt-14"
         >
           {/*LEFT sticky info panel */}
           {/* <div
@@ -369,7 +369,7 @@ export function AppScreens() {
             <div className="flex items-center gap-3">
               <div
                 className="text-[3rem] font-black leading-none"
-                style={{ color: RED, fontFamily: "'Outfit',sans-serif", fontVariantNumeric: 'tabular-nums' }}
+                style={{ color: RED, fontVariantNumeric: 'tabular-nums' }}
               >
                 {String(activeIdx + 1).padStart(2, '0')}
               </div>
@@ -397,7 +397,7 @@ export function AppScreens() {
               >
                 <h3
                   className="text-[2rem] font-black leading-[1.08] tracking-tight mb-3"
-                  style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}
+                  style={{ color: DARK }}
                 >
                   {activeScreen.label}
                 </h3>
@@ -531,7 +531,7 @@ export function AppScreens() {
                       transition={{ duration: 0.4 }}
                     />
                     <div className="flex justify-center py-2" style={{ background: '#0a0a0a' }}>
-                      <div className="w-20 h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.2)' }} />
+                      <div className="w-20 h-1.25 rounded-full" style={{ background: 'rgba(255,255,255,0.2)' }} />
                     </div>
                   </div>
                 </motion.div>
@@ -556,7 +556,7 @@ export function AppScreens() {
                 <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: RED }} />
                 {SCREENS[sliderIdx].tag}
               </div>
-              <h3 className="text-2xl font-black tracking-tight mb-2" style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}>
+              <h3 className="text-2xl font-black tracking-tight mb-2" style={{ color: DARK }}>
                 {SCREENS[sliderIdx].label}
               </h3>
               <p className="text-sm leading-[1.8]" style={{ color: MUTED }}>

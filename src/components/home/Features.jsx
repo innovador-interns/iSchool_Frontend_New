@@ -98,7 +98,7 @@ function ModulePanel({ feat, index, theme, total }) {
       className={`mp-${index} absolute inset-0 flex items-center`}
       style={{ opacity: 0, pointerEvents: 'none', willChange: 'opacity' }}
     >
-      <div className="w-full max-w-[1360px] mx-auto px-6 sm:px-14 lg:px-20">
+      <div className="w-full max-w-340 mx-auto px-6 sm:px-14 lg:px-20">
         <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-12 lg:gap-20 items-center min-h-[60vh]">
 
           {/*  LEFT: Module identity */}
@@ -113,7 +113,7 @@ function ModulePanel({ feat, index, theme, total }) {
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: theme.accent }} />
                 {theme.label}
               </div>
-              <span className="text-[11px] font-black tracking-[0.24em] uppercase" style={{ color: 'rgba(0,0,0,0.2)', fontFamily: "'Outfit',sans-serif" }}>
+              <span className="text-[11px] font-black tracking-[0.24em] uppercase" style={{ color: 'rgba(0,0,0,0.2)', }}>
                 {theme.num} / {String(total).padStart(2, '0')}
               </span>
             </div>
@@ -124,13 +124,13 @@ function ModulePanel({ feat, index, theme, total }) {
             {/* Module title — GSAP SplitText target */}
             <h3
               className={`mp-title-${index} text-[2.4rem] lg:text-[3.2rem] xl:text-[3.8rem] font-black leading-[1.05] tracking-tight`}
-              style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}
+              style={{ color: DARK, }}
             >
               {feat.title}
             </h3>
 
             {/* Accent rule */}
-            <div className={`mp-rule-${index} flex items-center gap-2 h-[3px]`} style={{ opacity: 0 }}>
+            <div className={`mp-rule-${index} flex items-center gap-2 h-0.75`} style={{ opacity: 0 }}>
               <div className="h-full w-14 rounded-full" style={{ background: theme.accent }} />
               <div className="h-full w-5 rounded-full" style={{ background: `${theme.accent}45` }} />
               <div className="h-full w-2.5 rounded-full" style={{ background: `${theme.accent}22` }} />
@@ -141,7 +141,7 @@ function ModulePanel({ feat, index, theme, total }) {
               className={`mp-badge-${index} inline-flex items-center gap-3 px-5 py-3 rounded-2xl w-fit`}
               style={{ background: `${theme.accent}09`, border: `1px solid ${theme.accent}1A`, opacity: 0 }}
             >
-              <span className="text-3xl font-black" style={{ color: theme.accent, fontFamily: "'Outfit',sans-serif" }}>
+              <span className="text-3xl font-black" style={{ color: theme.accent, }}>
                 {items.length}
               </span>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: MUTED }}>
@@ -201,7 +201,7 @@ function ModulePanel({ feat, index, theme, total }) {
                       )}
                       <span
                         className="text-[14px] leading-none font-bold tracking-tight whitespace-nowrap transition-colors duration-300 group-hover:text-black"
-                        style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}
+                        style={{ color: DARK, }}
                       >
                         {typeof item === 'string' ? item : item?.text}
                       </span>
@@ -367,7 +367,8 @@ export function Features() {
 
       {/*  INTRO SECTION (scrolls normally above the pinned scene)  */}
       <section
-        style={{ background: BG, fontFamily: "'Outfit',sans-serif" }}
+        id="features"
+        style={{ background: BG, }}
         className="relative overflow-hidden"
       >
         <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none z-0">
@@ -379,7 +380,7 @@ export function Features() {
           />
         </motion.div>
 
-        <div ref={hdrRef} className="relative z-10 max-w-[1360px] mx-auto px-6 sm:px-14 lg:px-20 pt-28 lg:pt-36 pb-14">
+        <div ref={hdrRef} className="relative z-10 max-w-340 mx-auto px-6 sm:px-14 lg:px-20 pt-28 lg:pt-36 pb-14">
 
           {/* Eyebrow */}
           <div
@@ -399,7 +400,7 @@ export function Features() {
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
             <h2
               className="feat-head text-3xl lg:text-5xl font-black leading-[1.03] tracking-tight"
-              style={{ color: DARK, fontFamily: "'Outfit',sans-serif", maxWidth: 700 }}
+              style={{ color: DARK, maxWidth: 700 }}
             >
               Simplifying school{' '}
               <span className="italic relative inline-block" style={{ color: BLUE }}>
@@ -460,7 +461,7 @@ export function Features() {
 
       {/* DESKTOP: PINNED SEQUENTIAL SCROLL */}
       <div className={isMobile ? 'hidden' : 'block'}>
-        <div ref={wrapRef} style={{ fontFamily: "'Outfit',sans-serif" }}>
+        <div ref={wrapRef} style={{ }}>
           <div
             ref={pinRef}
             className="relative w-full overflow-hidden"
@@ -524,7 +525,6 @@ export function Features() {
                 className="text-[4rem] font-black leading-none"
                 style={{
                   color: `${activeTheme.accent}14`,
-                  fontFamily: "'Outfit',sans-serif",
                   transition: 'color 0.5s ease',
                 }}
               >
@@ -571,7 +571,7 @@ export function Features() {
       <div className={isMobile ? 'block' : 'hidden'}>
         <section
           className="relative py-16 px-5 overflow-hidden"
-          style={{ background: BG, fontFamily: "'Outfit',sans-serif" }}
+          style={{ background: BG, }}
         >
           <div
             className="absolute inset-0 pointer-events-none opacity-[0.28]"
@@ -587,7 +587,7 @@ export function Features() {
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: BLUE }} />
               Platform Features
             </div>
-            <h2 className="text-[2.4rem] font-black leading-[1.06] tracking-tight mb-3" style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}>
+            <h2 className="text-[2.4rem] font-black leading-[1.06] tracking-tight mb-3" style={{ color: DARK, }}>
               Built to{' '}
               <span className="italic relative inline-block" style={{ color: BLUE }}>
                 simplify
@@ -627,7 +627,7 @@ export function Features() {
                           <span className="w-1 h-1 rounded-full" style={{ background: t.accent }} />
                           {t.label} · {t.num}
                         </div>
-                        <h3 className="text-xl font-black leading-snug" style={{ color: DARK, fontFamily: "'Outfit',sans-serif" }}>{feat.title}</h3>
+                        <h3 className="text-xl font-black leading-snug" style={{ color: DARK, }}>{feat.title}</h3>
                       </div>
                       <div className="text-4xl">{t.emoji}</div>
                     </div>
