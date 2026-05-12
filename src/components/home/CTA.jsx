@@ -39,7 +39,7 @@ function Ticker({ value, suffix = '' }) {
   return <span ref={ref}>{display.toLocaleString()}{suffix}</span>
 }
 
-//  Magnetic button wrapper ─
+//  Magnetic button wrapper
 function MagneticWrap({ children, strength = 0.3 }) {
   const ref = useRef(null)
   const x = useSpring(0, { stiffness: 200, damping: 20 })
@@ -61,7 +61,7 @@ function MagneticWrap({ children, strength = 0.3 }) {
   )
 }
 
-//  Floating orb ─
+//  Floating orb
 function Orb({ className, delay = 0, duration = 8 }) {
   return (
     <motion.div
@@ -72,7 +72,7 @@ function Orb({ className, delay = 0, duration = 8 }) {
   )
 }
 
-//  Stat card ─
+//  Stat card
 function StatCard({ value, suffix, label, accent, delay }) {
   return (
     <motion.div
@@ -189,7 +189,7 @@ export function CTA() {
       onMouseMove={handleMouseMove}
       className="relative overflow-hidden bg-white py-0"
     >
-      {/*  Background system ─ */}
+      {/*  Background system */}
       <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
         {/* Primary radial — left blue glow */}
         <div className="absolute top-[-10%] left-[-5%] w-[55vw] h-[55vw] rounded-full"
@@ -217,7 +217,7 @@ export function CTA() {
 
       </motion.div>
 
-      {/*  Floating ambient orbs ─ */}
+      {/*  Floating ambient orbs */}
       <Orb className="absolute top-[8%] left-[12%] w-3 h-3 rounded-full bg-sky-400/30 blur-sm" delay={0} duration={7} />
       <Orb className="absolute top-[22%] left-[6%] w-1.5 h-1.5 rounded-full bg-sky-300/40" delay={1.2} duration={5} />
       <Orb className="absolute top-[55%] left-[18%] w-2 h-2 rounded-full bg-red-400/30" delay={2.5} duration={9} />
@@ -227,16 +227,16 @@ export function CTA() {
       {/*  Horizontal rule top  */}
       <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-sky-500/30 to-transparent" />
 
-      {/*  Marquee belt ─ */}
+      {/*  Marquee belt */}
       <div className="relative z-10 border-b border-slate-100">
         <Marquee />
       </div>
 
-      {/*  Main content ─ */}
+      {/*  Main content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-20">
         <div className="grid lg:grid-cols-[1fr_auto] gap-0 lg:gap-24 items-start pt-20 pb-8 lg:pt-18 lg:pb-12">
 
-          {/*  Left: Text block ─ */}
+          {/*  Left: Text block */}
           <div className="flex flex-col gap-10">
 
             {/* Badge */}
